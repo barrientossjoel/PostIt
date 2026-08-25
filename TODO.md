@@ -1,0 +1,34 @@
+# PostIt — Master TODO List
+
+## Completed Tasks ✅
+- [x] Initial project setup with Vite + React + TypeScript + Bun (`/mnt/Disco_SDB/Workspace/PostIt`).
+- [x] Clean & Screaming Architecture layer separation (`core/entities`, `core/interfaces`, `core/usecases`, `infrastructure/adapters`, `infrastructure/publishing`, `features/*`).
+- [x] Redimensionamiento Manual con Ícono L al Revés (⌟): Integrado tirador de redimensionamiento interactivo por arrastre en la esquina inferior derecha de cada tarjeta.
+- [x] Eliminación de Scrollbars Internas en Tarjetas: Expansión vertical natural y adaptativa según la cantidad de contenido en borradores pendientes.
+- [x] Unificación de Color de Fondo de Mensajes: Eliminado el recuadro negro interior en las tarjetas; ahora hereda transparentemente el tono secundario de la tarjeta (`#161b22`).
+- [x] Layout Estilo Pinterest (Masonry Grid): Distribución orgánica y responsiva en columnas (`columns: 340px auto`, `breakInside: avoid`) para organizar múltiples publicaciones pendientes de manera fluida.
+- [x] Invertir orden cronológico de commits: Botón selector `Más recientes` / `Más antiguos` con ícono `ArrowUpDown` en la cabecera de commits.
+- [x] Datos de Ejemplo Precargados (Pre-seeded DB Data): Repositorios de ejemplo (`Nout`, `PostIt`, `Galan`, `Digital-Impulso`), commits y borradores almacenados de forma permanente en `LocalStorageRepository` e `GithubApiAdapter`.
+- [x] Full-width screen expansion on desktop (removed `max-width: 1280px` limit to fill 100% monitor viewport).
+- [x] Full vertical height optimization across desktop & mobile viewports.
+- [x] Official GitHub API Commits Pagination (`35 commits per page`, `page` state management, `< Anterior` & `Siguiente >` pagination buttons).
+- [x] 1-Click Short SHA Copy button (`<Copy>` icon with toast feedback).
+- [x] Branch selector indicator tag (`main ▾`).
+- [x] Typography fix: Integrated Google Fonts `Inter` & `JetBrains Mono` matching X (Chirp) & GitHub typography.
+- [x] Elimination of horizontal scroll: Enforced strict 100% max-width & `overflow-x: hidden` across viewports.
+- [x] Mobile UI optimization: Clean nav tabs, flexible wrapping, non-breaking buttons across all screen sizes.
+- [x] Breadcrumb bar: `Repositorios` > `usuario/repo` with mobile 2-step navigation.
+- [x] Minimalist commits header: Eliminated redundant repo subtitles, clean single-row header with `←` back button and badge.
+- [x] GitHub-styled commit cards: Integrated background matching (`var(--bg-secondary)`), date grouping, author avatars, and `...` expand button for commit bodies.
+- [x] Custom dark checkboxes: Styled checkboxes slightly darker (`#0b0e14`) with custom checkmark.
+- [x] GitHub API Adapter supporting public and private repositories (`src/infrastructure/adapters/GithubApiAdapter.ts`).
+- [x] Google Gemini AI Adapter for draft generation and text refinement (`src/infrastructure/adapters/GeminiAiAdapter.ts`).
+- [x] Multi-platform publishing strategies: Publer API and 1-Click Free X Intent (`src/infrastructure/publishing/`).
+- [x] Local Storage persistence adapter for settings and post drafts (`src/infrastructure/adapters/LocalStorageRepository.ts`).
+- [x] DI Container setup (`src/infrastructure/container.ts`).
+- [x] Repository Explorer feature domain (`src/features/explorer/`).
+- [x] Pending Queue feature domain (`src/features/pending/`).
+- [x] Post Preview & Live Social Simulator domain (`src/features/preview/`).
+- [x] Application Settings feature domain (`src/features/settings/`).
+- [x] Shared UI components & Toast notification system (`src/features/shared/`).
+- [x] Production build verification (`bun run build`).
