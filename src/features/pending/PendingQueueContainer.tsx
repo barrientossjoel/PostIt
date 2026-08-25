@@ -40,7 +40,7 @@ const ResizablePendingCard: React.FC<ResizableCardProps> = ({ post, queue }) => 
       const deltaY = moveEvent.clientY - startPos.current.y;
 
       const newWidth = Math.max(280, startPos.current.w + deltaX);
-      const newHeight = Math.max(160, startPos.current.h + deltaY);
+      const newHeight = Math.max(170, startPos.current.h + deltaY);
 
       setDimensions({ width: newWidth, height: newHeight });
     };
@@ -60,19 +60,17 @@ const ResizablePendingCard: React.FC<ResizableCardProps> = ({ post, queue }) => 
       ref={cardRef}
       className="github-card"
       style={{
-        breakInside: 'avoid',
-        marginBottom: '1rem',
         display: 'flex',
         flexDirection: 'column',
         gap: '0.85rem',
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-color)',
         position: 'relative',
-        width: dimensions.width ? `${dimensions.width}px` : '100%',
+        width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        minHeight: dimensions.height ? `${dimensions.height}px` : 'auto',
         height: dimensions.height ? `${dimensions.height}px` : 'auto',
-        minWidth: '280px',
-        minHeight: '160px',
-        overflow: 'hidden',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
@@ -188,8 +186,16 @@ export const PendingQueueContainer: React.FC<Props> = ({
         </div>
       </div>
 
-      {/* Pinterest-style Masonry Layout */}
-      <div style={{ columns: '340px auto', columnGap: '1rem', width: '100%' }}>
+      {/* Non-overlapping Responsive CSS Grid */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gap: '1.25rem',
+          alignItems: 'start',
+          width: '100%',
+        }}
+      >
         {queue.pendingPosts.map((post) => (
           <ResizablePendingCard key={post.id} post={post} queue={queue} />
         ))}

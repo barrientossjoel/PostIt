@@ -45,7 +45,7 @@ export function useRepoExplorer(
       setRepos(fetchedRepos);
       if (fetchedRepos.length > 0 && !selectedRepo) {
         setSelectedRepo(fetchedRepos[0]);
-        fetchCommitsForRepo(fetchedRepos[0], 1);
+        fetchCommitsForRepo(fetchedRepos[0], 1, sortOrder);
       }
     } catch (err: any) {
       showToast(err.message, 'error');
@@ -54,14 +54,19 @@ export function useRepoExplorer(
     }
   };
 
-  const fetchCommitsForRepo = async (repo: Repository, pageNum: number) => {
+  const fetchCommitsForRepo = async (
+    repo: Repository,
+    pageNum: number,
+    order: 'desc' | 'asc' = sortOrder
+  ) => {
     setLoadingCommits(true);
     try {
       const fetchedCommits = await container.githubService.fetchRepositoryCommits(
         settings.githubToken,
         repo.fullName,
         35,
-        pageNum
+        pageNum,
+        order
       );
       setCommits(fetchedCommits);
       setHasMoreCommits(fetchedCommits.length === 35);
@@ -78,25 +83,30 @@ export function useRepoExplorer(
     setExpandedCommitShas([]);
     setPage(1);
     setMobileStep('commits');
-    await fetchCommitsForRepo(repo, 1);
+    await fetchCommitsForRepo(repo, 1, sortOrder);
   };
 
   const handleNextPage = async () => {
     if (!selectedRepo || !hasMoreCommits) return;
     const nextPage = page + 1;
     setPage(nextPage);
-    await fetchCommitsForRepo(selectedRepo, nextPage);
+    await fetchCommitsForRepo(selectedRepo, nextPage, sortOrder);
   };
 
   const handlePrevPage = async () => {
     if (!selectedRepo || page <= 1) return;
     const prevPage = page - 1;
     setPage(prevPage);
-    await fetchCommitsForRepo(selectedRepo, prevPage);
+    await fetchCommitsForRepo(selectedRepo, prevPage, sortOrder);
   };
 
-  const toggleSortOrder = () => {
-    setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'));
+  const toggleSortOrder = async () => {
+    const nextSort = sortOrder === 'desc' ? 'asc' : 'desc';
+    setSortOrder(nextSort);
+    setPage(1);
+    if (selectedRepo) {
+      await fetchCommitsForRepo(selectedRepo, 1, nextSort);
+    }
   };
 
   const toggleCommitSelection = (sha: string) => {
@@ -157,7 +167,7 @@ export function useRepoExplorer(
   const generatePostFromSelectedCommits = async () => {
     if (!selectedRepo || selectedCommitShas.length === 0) return;
 
-    const selectedCommits = sortedCommits.filter((c) => selectedCommitShas.includes(c.sha));
+    const selectedCommits = commits.filter((c) => selectedCommitShas.includes(c.sha));
     setGeneratingPost(true);
 
     try {
@@ -179,12 +189,6 @@ export function useRepoExplorer(
     }
   };
 
-  const sortedCommits = [...commits].sort((a, b) => {
-    const timeA = new Date(a.author.date).getTime();
-    const timeB = new Date(b.author.date).getTime();
-    return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
-  });
-
   const filteredRepos = repos.filter((r) => {
     const matchesSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase());
     if (filterType === 'public') return matchesSearch && !r.isPrivate;
@@ -196,7 +200,7 @@ export function useRepoExplorer(
     repos: filteredRepos,
     loadingRepos,
     selectedRepo,
-    commits: sortedCommits,
+    commits,
     loadingCommits,
     selectedCommitShas,
     expandedCommitShas,

@@ -3,11 +3,12 @@
 ## Completed Tasks ✅
 - [x] Initial project setup with Vite + React + TypeScript + Bun (`/mnt/Disco_SDB/Workspace/PostIt`).
 - [x] Clean & Screaming Architecture layer separation (`core/entities`, `core/interfaces`, `core/usecases`, `infrastructure/adapters`, `infrastructure/publishing`, `features/*`).
+- [x] Ordenamiento Cronológico Global de Repositorio (`Más recientes` / `Más antiguos`): Al cambiar el filtro, la consulta obtiene y ordena los commits de **todo el historial del repositorio** (comenzando por los commits iniciales más antiguos de la historia del proyecto en la Página 1 al seleccionar `Más antiguos`).
+- [x] Corrección de Solapamiento de Tarjetas (Non-Overlapping Grid Layout): Eliminado el desbordamiento de las tarjetas al redimensionar usando CSS Grid auto-fill responsivo con `maxWidth: 100%` e integración estricta de flujo vertical en la rejilla.
 - [x] Redimensionamiento Manual con Ícono L al Revés (⌟): Integrado tirador de redimensionamiento interactivo por arrastre en la esquina inferior derecha de cada tarjeta.
 - [x] Eliminación de Scrollbars Internas en Tarjetas: Expansión vertical natural y adaptativa según la cantidad de contenido en borradores pendientes.
 - [x] Unificación de Color de Fondo de Mensajes: Eliminado el recuadro negro interior en las tarjetas; ahora hereda transparentemente el tono secundario de la tarjeta (`#161b22`).
 - [x] Layout Estilo Pinterest (Masonry Grid): Distribución orgánica y responsiva en columnas (`columns: 340px auto`, `breakInside: avoid`) para organizar múltiples publicaciones pendientes de manera fluida.
-- [x] Invertir orden cronológico de commits: Botón selector `Más recientes` / `Más antiguos` con ícono `ArrowUpDown` en la cabecera de commits.
 - [x] Datos de Ejemplo Precargados (Pre-seeded DB Data): Repositorios de ejemplo (`Nout`, `PostIt`, `Galan`, `Digital-Impulso`), commits y borradores almacenados de forma permanente en `LocalStorageRepository` e `GithubApiAdapter`.
 - [x] Full-width screen expansion on desktop (removed `max-width: 1280px` limit to fill 100% monitor viewport).
 - [x] Full vertical height optimization across desktop & mobile viewports.

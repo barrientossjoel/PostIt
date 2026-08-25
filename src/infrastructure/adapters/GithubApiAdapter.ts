@@ -181,15 +181,29 @@ export class GithubApiAdapter implements IGithubService {
     token: string,
     repoFullName: string,
     limit: number = 35,
-    page: number = 1
+    page: number = 1,
+    sortOrder: 'desc' | 'asc' = 'desc'
   ): Promise<Commit[]> {
+    const getSampleData = () => {
+      const raw = SAMPLE_COMMITS_MAP[repoFullName] || SAMPLE_COMMITS_MAP['barrientossjoel/Nout'];
+      const sorted = [...raw].sort((a, b) => {
+        const tA = new Date(a.author.date).getTime();
+        const tB = new Date(b.author.date).getTime();
+        return sortOrder === 'desc' ? tB - tA : tA - tB;
+      });
+      const start = (page - 1) * limit;
+      return sorted.slice(start, start + limit);
+    };
+
     if (!token) {
-      return SAMPLE_COMMITS_MAP[repoFullName] || SAMPLE_COMMITS_MAP['barrientossjoel/Nout'];
+      return getSampleData();
     }
 
     try {
+      // For real GitHub API: if sortOrder === 'asc', we fetch up to 100 commits to sort across repo history
+      const fetchPerPage = sortOrder === 'asc' ? 100 : limit;
       const res = await fetch(
-        `${this.baseUrl}/repos/${repoFullName}/commits?per_page=${limit}&page=${page}`,
+        `${this.baseUrl}/repos/${repoFullName}/commits?per_page=${fetchPerPage}&page=${sortOrder === 'asc' ? 1 : page}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -199,11 +213,11 @@ export class GithubApiAdapter implements IGithubService {
       );
 
       if (!res.ok) {
-        return SAMPLE_COMMITS_MAP[repoFullName] || SAMPLE_COMMITS_MAP['barrientossjoel/Nout'];
+        return getSampleData();
       }
 
       const data = await res.json();
-      return data.map((item: any) => ({
+      const mapped: Commit[] = data.map((item: any) => ({
         sha: item.sha,
         message: item.commit.message,
         author: {
@@ -215,8 +229,17 @@ export class GithubApiAdapter implements IGithubService {
         htmlUrl: item.html_url,
         repoFullName,
       }));
+
+      mapped.sort((a, b) => {
+        const tA = new Date(a.author.date).getTime();
+        const tB = new Date(b.author.date).getTime();
+        return sortOrder === 'desc' ? tB - tA : tA - tB;
+      });
+
+      const start = (page - 1) * limit;
+      return mapped.slice(start, start + limit);
     } catch {
-      return SAMPLE_COMMITS_MAP[repoFullName] || SAMPLE_COMMITS_MAP['barrientossjoel/Nout'];
+      return getSampleData();
     }
   }
 }

@@ -8,6 +8,7 @@ export interface IGithubService {
     token: string,
     repoFullName: string,
     limit?: number,
-    page?: number
+    page?: number,
+    sortOrder?: 'desc' | 'asc'
   ): Promise<Commit[]>;
 }
