@@ -116,12 +116,43 @@ const SAMPLE_COMMITS_MAP: { [repoFullName: string]: Commit[] } = {
   ],
 };
 
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
 export class GithubApiAdapter implements IGithubService {
   private baseUrl = 'https://api.github.com';
+  private cache = new Map<string, CacheEntry<any>>();
+  private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutos de tiempo de vida para la caché
+
+  private getFromCache<T>(key: string, ttlMs: number = this.DEFAULT_TTL): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+    if (Date.now() - entry.timestamp > ttlMs) {
+      this.cache.delete(key);
+      return null;
+    }
+    return entry.data as T;
+  }
+
+  private setToCache<T>(key: string, data: T): void {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  public clearCache(): void {
+    this.cache.clear();
+  }
 
   async verifyToken(token: string): Promise<{ username: string; avatarUrl: string }> {
     if (!token) {
       return { username: 'barrientossjoel', avatarUrl: 'https://github.com/barrientossjoel.png' };
+    }
+
+    const cacheKey = `user:${token}`;
+    const cachedUser = this.getFromCache<{ username: string; avatarUrl: string }>(cacheKey, 10 * 60 * 1000);
+    if (cachedUser) {
+      return cachedUser;
     }
 
     const res = await fetch(`${this.baseUrl}/user`, {
@@ -136,15 +167,24 @@ export class GithubApiAdapter implements IGithubService {
     }
 
     const data = await res.json();
-    return {
+    const result = {
       username: data.login,
       avatarUrl: data.avatar_url,
     };
+
+    this.setToCache(cacheKey, result);
+    return result;
   }
 
   async fetchUserRepositories(token: string): Promise<Repository[]> {
     if (!token) {
       return SAMPLE_REPOS;
+    }
+
+    const cacheKey = `repos:${token}`;
+    const cachedRepos = this.getFromCache<Repository[]>(cacheKey);
+    if (cachedRepos) {
+      return cachedRepos;
     }
 
     try {
@@ -160,7 +200,11 @@ export class GithubApiAdapter implements IGithubService {
       }
 
       const data = await res.json();
-      return data.map((repo: any) => ({
+      if (!Array.isArray(data)) {
+        return SAMPLE_REPOS;
+      }
+
+      const repos: Repository[] = data.map((repo: any) => ({
         id: repo.id,
         name: repo.name,
         fullName: repo.full_name,
@@ -172,6 +216,9 @@ export class GithubApiAdapter implements IGithubService {
         language: repo.language,
         stargazersCount: repo.stargazers_count || 0,
       }));
+
+      this.setToCache(cacheKey, repos);
+      return repos;
     } catch {
       return SAMPLE_REPOS;
     }
@@ -184,6 +231,12 @@ export class GithubApiAdapter implements IGithubService {
     page: number = 1,
     sortOrder: 'desc' | 'asc' = 'desc'
   ): Promise<Commit[]> {
+    const cacheKey = `commits:${repoFullName}:${limit}:${page}:${sortOrder}`;
+    const cachedCommits = this.getFromCache<Commit[]>(cacheKey);
+    if (cachedCommits) {
+      return cachedCommits;
+    }
+
     const getSampleData = () => {
       const raw = SAMPLE_COMMITS_MAP[repoFullName] || SAMPLE_COMMITS_MAP['barrientossjoel/Nout'];
       const sorted = [...raw].sort((a, b) => {
@@ -200,10 +253,8 @@ export class GithubApiAdapter implements IGithubService {
     }
 
     try {
-      // For real GitHub API: if sortOrder === 'asc', we fetch up to 100 commits to sort across repo history
-      const fetchPerPage = sortOrder === 'asc' ? 100 : limit;
       const res = await fetch(
-        `${this.baseUrl}/repos/${repoFullName}/commits?per_page=${fetchPerPage}&page=${sortOrder === 'asc' ? 1 : page}`,
+        `${this.baseUrl}/repos/${repoFullName}/commits?per_page=${limit}&page=${page}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -217,6 +268,10 @@ export class GithubApiAdapter implements IGithubService {
       }
 
       const data = await res.json();
+      if (!Array.isArray(data)) {
+        return getSampleData();
+      }
+
       const mapped: Commit[] = data.map((item: any) => ({
         sha: item.sha,
         message: item.commit.message,
@@ -236,8 +291,8 @@ export class GithubApiAdapter implements IGithubService {
         return sortOrder === 'desc' ? tB - tA : tA - tB;
       });
 
-      const start = (page - 1) * limit;
-      return mapped.slice(start, start + limit);
+      this.setToCache(cacheKey, mapped);
+      return mapped;
     } catch {
       return getSampleData();
     }

@@ -41,6 +41,9 @@ export function useRepoExplorer(
   const loadRepos = async () => {
     setLoadingRepos(true);
     try {
+      if ('clearCache' in container.githubService && typeof (container.githubService as any).clearCache === 'function') {
+        (container.githubService as any).clearCache();
+      }
       const fetchedRepos = await container.githubService.fetchUserRepositories(settings.githubToken);
       setRepos(fetchedRepos);
       if (fetchedRepos.length > 0 && !selectedRepo) {
