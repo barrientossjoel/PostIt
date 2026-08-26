@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AtSign, UserCheck, ShieldCheck, LogIn } from 'lucide-react';
+import { AtSign, LogIn } from 'lucide-react';
 import type { SocialAccount } from '../types/SocialAccount';
 import type { UserProfile } from '../../../core/entities/User';
 
@@ -20,54 +20,60 @@ const PLATFORMS: { id: SocialPlatform; label: string; bg: string; badge: string;
   { id: 'instagram', label: 'Instagram', bg: 'linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)', badge: 'ig' },
 ];
 
-export const AddSocialAccountModal: React.FC<Props> = ({ isOpen, onClose, onAddAccount, user, onOpenAuth }) => {
+export const AddSocialAccountModal: React.FC<Props> = ({ isOpen, onClose, onAddAccount }) => {
   const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatform>('linkedin');
+  const [handle, setHandle] = useState('');
+  const [profileName, setProfileName] = useState('');
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   if (!isOpen) return null;
 
-  // Read active user from prop or localStorage without hardcoded defaults
-  const activeUser: UserProfile | null = user || (() => {
-    try {
-      const saved = localStorage.getItem('postit_user_session');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  })();
-
   const selectedPlatformObj = PLATFORMS.find((p) => p.id === selectedPlatform) || PLATFORMS[0];
 
-  const handleConnect = () => {
-    if (!activeUser) return;
-    const userName = activeUser.name || 'Cuenta Social';
-    const userHandle = activeUser.handle || `@${activeUser.email.split('@')[0]}`;
-    const userAvatar = activeUser.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${activeUser.email}`;
+  const handleConnectPlatform = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!handle.trim()) return;
 
-    onAddAccount({
-      name: userName,
-      handle: userHandle,
-      platform: selectedPlatform,
-      avatarUrl: userAvatar,
-    });
-    onClose();
+    setIsAuthenticating(true);
+    setTimeout(() => {
+      const cleanHandle = handle.trim().startsWith('@') ? handle.trim() : `@${handle.trim()}`;
+      const name = profileName.trim() || cleanHandle.replace(/^@/, '');
+      const avatarUrl = `https://unavatar.io/${selectedPlatform === 'x' ? 'twitter' : selectedPlatform}/${cleanHandle.replace(/^@/, '')}`;
+
+      onAddAccount({
+        name,
+        handle: cleanHandle,
+        platform: selectedPlatform,
+        avatarUrl,
+      });
+
+      setIsAuthenticating(false);
+      setHandle('');
+      setProfileName('');
+      onClose();
+    }, 600);
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-card publer-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header-centered">
-          <h2>Add your social accounts</h2>
-          <p>Connect your LinkedIn, Twitter / X, Threads, and Instagram accounts</p>
+          <h2>Conectar Cuenta de Red Social</h2>
+          <p>Selecciona una red social e inicia sesión para vincularla de manera independiente</p>
         </div>
 
-        {/* Platform Selection Cards */}
+        {/* Platform Selection Grid */}
         <div className="social-grid-4">
           {PLATFORMS.map(({ id, label, bg, badge, isIcon }) => {
             const isSelected = selectedPlatform === id;
             return (
               <div
                 key={id}
-                onClick={() => setSelectedPlatform(id)}
+                onClick={() => {
+                  setSelectedPlatform(id);
+                  setHandle('');
+                  setProfileName('');
+                }}
                 className={`grid-platform-card ${isSelected ? 'selected' : ''}`}
               >
                 {isSelected && <span className="cyan-check-badge">✓</span>}
@@ -80,80 +86,50 @@ export const AddSocialAccountModal: React.FC<Props> = ({ isOpen, onClose, onAddA
           })}
         </div>
 
-        {/* Dynamic User Session Info OR Login Prompt */}
-        {activeUser ? (
-          <>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.85rem',
-                padding: '0.85rem 1rem',
-                background: 'var(--bg-secondary)',
-                border: '1px solid var(--border-input)',
-                borderRadius: 'var(--radius-md)',
-                marginTop: '0.5rem',
-              }}
-            >
-              <img
-                src={activeUser.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${activeUser.email}`}
-                alt={activeUser.name}
-                style={{ width: '42px', height: '42px', borderRadius: '50%', border: '2px solid var(--accent-cyan)', objectFit: 'cover' }}
-              />
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.9rem', fontWeight: 700, color: '#ffffff' }}>
-                  <UserCheck size={16} color="var(--accent-cyan)" />
-                  <span>{activeUser.name}</span>
-                </div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <ShieldCheck size={13} color="var(--accent-github-hover)" />
-                  <span>Autenticado con Google ({activeUser.email})</span>
-                </div>
-              </div>
-            </div>
+        {/* Platform Specific Login / Connection Form */}
+        <form onSubmit={handleConnectPlatform} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.75rem' }}>
+          <div className="input-group">
+            <label className="input-label">Usuario / Handle en {selectedPlatformObj.label} *</label>
+            <input
+              type="text"
+              className="input-text"
+              placeholder={`Ej. @usuario_${selectedPlatformObj.id}`}
+              value={handle}
+              onChange={(e) => setHandle(e.target.value)}
+              required
+            />
+          </div>
 
-            <div className="center-actions" style={{ marginTop: '1rem' }}>
-              <button
-                type="button"
-                className="btn-publer-continue"
-                onClick={handleConnect}
-                style={{ width: '100%', justifyContent: 'center' }}
-              >
-                Conectar {selectedPlatformObj.label} como @{(activeUser.handle || activeUser.email.split('@')[0]).replace(/^@/, '')}
-              </button>
-            </div>
-          </>
-        ) : (
-          <div
+          <div className="input-group">
+            <label className="input-label">Nombre de Perfil (Opcional)</label>
+            <input
+              type="text"
+              className="input-text"
+              placeholder="Ej. Mi Nombre / Marca"
+              value={profileName}
+              onChange={(e) => setProfileName(e.target.value)}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn-publer-continue"
+            disabled={isAuthenticating || !handle.trim()}
             style={{
+              width: '100%',
+              justifyContent: 'center',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'center',
-              gap: '0.85rem',
-              padding: '1.25rem',
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-input)',
-              borderRadius: 'var(--radius-md)',
+              gap: '8px',
               marginTop: '0.5rem',
-              textAlign: 'center',
             }}
           >
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-              No hay una sesión de usuario activa. Inicia sesión con Google para vincular tus redes automáticamente.
-            </p>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => {
-                onClose();
-                onOpenAuth?.();
-              }}
-              style={{ color: 'var(--accent-cyan)', borderColor: 'var(--accent-cyan)', gap: '6px' }}
-            >
-              <LogIn size={15} /> Iniciar Sesión con Google
-            </button>
-          </div>
-        )}
+            <LogIn size={16} />
+            {isAuthenticating
+              ? `Autenticando con ${selectedPlatformObj.label}...`
+              : `Iniciar Sesión y Vincular ${selectedPlatformObj.label}`}
+          </button>
+        </form>
       </div>
     </div>
   );
