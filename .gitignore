@@ -15,6 +15,10 @@ dist
 dist-ssr
 *.local
 
+# Team logs and questions
+.teams/
+.questions/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
