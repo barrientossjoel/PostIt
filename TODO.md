@@ -3,7 +3,13 @@
 ## Completed Tasks ✅
 - [x] Initial project setup with Vite + React + TypeScript + Bun (`/mnt/Disco_SDB/Workspace/PostIt`).
 - [x] Clean & Screaming Architecture layer separation (`core/entities`, `core/interfaces`, `core/usecases`, `infrastructure/adapters`, `infrastructure/publishing`, `features/*`).
-- [x] Ordenamiento Cronológico Global de Repositorio (`Más recientes` / `Más antiguos`): Al cambiar el filtro, la consulta obtiene y ordena los commits de **todo el historial del repositorio** (comenzando por los commits iniciales más antiguos de la historia del proyecto en la Página 1 al seleccionar `Más antiguos`).
+- [x] Autenticación con Google y Perfil de Usuario Personal (`GoogleAuthModal.tsx`, `User.ts`, `session state` en LocalStorage): Conexión de perfil Google con foto, nombre, tokens de GitHub, Gemini API key y cuentas de redes sociales conectadas (𝕏, LinkedIn, Facebook).
+- [x] Traducción Gratuita de Commits a Español Sin IA (`FreeTranslationAdapter.ts`): Motor de traducción a 0 costo (diccionario de convenciones dev + API pública de traducción MyMemory sin requirimiento de tokens ni consumo de cuota) con botón `🌐 Traducir a Español (Gratis)` en el Editor.
+- [x] Botón Cancelar y Devolver a Pendientes (`❌ Cancelar p/ Pendientes`): Permite cancelar la edición actual devolviendo el borrador a la cola de pendientes (`status: 'pending'`) y navegando automáticamente de regreso.
+- [x] Auto-Recorte Inteligente a 280 Caracteres (`✂️ Recortar a 280 chars`): Detecta alertas de desbordamiento de caracteres para X/Twitter y trunca inteligentemente el texto respetando hashtags y frases completas.
+- [x] Suite de Publicación Embedida en la Misma Página (`SocialSharePanel.tsx`): Remplazado el pop-up exterior por un panel/drawer embedido interactivo de envío directo para 𝕏 (X / Twitter), LinkedIn y Facebook sin salir del sitio web.
+- [x] Simulador de Redes Multicanal Estilo Publer (`SocialCardSimulator.tsx`): Permite alternar previsualizaciones en tiempo real entre 𝕏, LinkedIn y Facebook antes de publicar.
+- [x] Ordenamiento Cronológico Global de Repositorio (`Más recientes` / `Más antiguos`): Consulta y ordena los commits de **todo el historial del repositorio** (comenzando por los commits iniciales más antiguos de la historia del proyecto en la Página 1 al seleccionar `Más antiguos`).
 - [x] Corrección de Solapamiento de Tarjetas (Non-Overlapping Grid Layout): Eliminado el desbordamiento de las tarjetas al redimensionar usando CSS Grid auto-fill responsivo con `maxWidth: 100%` e integración estricta de flujo vertical en la rejilla.
 - [x] Redimensionamiento Manual con Ícono L al Revés (⌟): Integrado tirador de redimensionamiento interactivo por arrastre en la esquina inferior derecha de cada tarjeta.
 - [x] Eliminación de Scrollbars Internas en Tarjetas: Expansión vertical natural y adaptativa según la cantidad de contenido en borradores pendientes.
@@ -22,14 +28,4 @@
 - [x] Minimalist commits header: Eliminated redundant repo subtitles, clean single-row header with `←` back button and badge.
 - [x] GitHub-styled commit cards: Integrated background matching (`var(--bg-secondary)`), date grouping, author avatars, and `...` expand button for commit bodies.
 - [x] Custom dark checkboxes: Styled checkboxes slightly darker (`#0b0e14`) with custom checkmark.
-- [x] GitHub API Adapter supporting public and private repositories (`src/infrastructure/adapters/GithubApiAdapter.ts`).
-- [x] Google Gemini AI Adapter for draft generation and text refinement (`src/infrastructure/adapters/GeminiAiAdapter.ts`).
-- [x] Multi-platform publishing strategies: Publer API and 1-Click Free X Intent (`src/infrastructure/publishing/`).
-- [x] Local Storage persistence adapter for settings and post drafts (`src/infrastructure/adapters/LocalStorageRepository.ts`).
-- [x] DI Container setup (`src/infrastructure/container.ts`).
-- [x] Repository Explorer feature domain (`src/features/explorer/`).
-- [x] Pending Queue feature domain (`src/features/pending/`).
-- [x] Post Preview & Live Social Simulator domain (`src/features/preview/`).
-- [x] Application Settings feature domain (`src/features/settings/`).
-- [x] Shared UI components & Toast notification system (`src/features/shared/`).
 - [x] Production build verification (`bun run build`).

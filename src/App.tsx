@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { AppSettings } from './core/entities/Settings';
 import type { Post } from './core/entities/Post';
+import type { UserProfile } from './core/entities/User';
 import { container } from './infrastructure/container';
 
 import { Navbar } from './features/shared/components/Navbar';
@@ -12,6 +13,22 @@ import { RepoExplorerContainer } from './features/explorer/RepoExplorerContainer
 import { PendingQueueContainer } from './features/pending/PendingQueueContainer';
 import { PostPreviewContainer } from './features/preview/PostPreviewContainer';
 import { SettingsContainer } from './features/settings/SettingsContainer';
+import { GoogleAuthModal } from './features/auth/GoogleAuthModal';
+
+const DEFAULT_GOOGLE_USER: UserProfile = {
+  id: 'usr_google_001',
+  email: 'joel.barrientos@gmail.com',
+  name: 'Joe',
+  handle: '@jbardev',
+  avatarUrl: 'https://github.com/barrientossjoel.png',
+  provider: 'google',
+  connectedAccounts: {
+    x: true,
+    linkedin: true,
+    facebook: false,
+  },
+};
+
 
 export function App() {
   const [activeTab, setActiveTab] = useState<TabId>('explorer');
@@ -20,9 +37,24 @@ export function App() {
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
+  // User Google Auth state
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    const saved = localStorage.getItem('postit_user_session');
+    return saved ? JSON.parse(saved) : DEFAULT_GOOGLE_USER;
+  });
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
   useEffect(() => {
     updatePendingCount();
   }, [activeTab]);
+
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('postit_user_session', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('postit_user_session');
+    }
+  }, [user]);
 
   const updatePendingCount = () => {
     const allPosts = container.postRepository.getAllPosts();
@@ -43,6 +75,28 @@ export function App() {
     container.settingsRepository.saveSettings(newSettings);
   };
 
+  const handleLoginWithGoogle = (email?: string, name?: string) => {
+    const newUser: UserProfile = {
+      id: `usr_google_${Date.now()}`,
+      email: email || 'usuario.google@gmail.com',
+      name: name || 'Usuario Google',
+      avatarUrl: 'https://github.com/barrientossjoel.png',
+      provider: 'google',
+      connectedAccounts: {
+        x: true,
+        linkedin: true,
+        facebook: true,
+      },
+    };
+    setUser(newUser);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    showToast('Sesión de Google cerrada', 'info');
+    setIsAuthModalOpen(false);
+  };
+
   return (
     <div className="app-container">
       <Navbar
@@ -50,6 +104,8 @@ export function App() {
         setActiveTab={setActiveTab}
         pendingCount={pendingCount}
         settings={settings}
+        user={user}
+        onOpenGoogleAuth={() => setIsAuthModalOpen(true)}
       />
 
       <main className="main-content">
@@ -82,6 +138,7 @@ export function App() {
               setCurrentPost(post);
               updatePendingCount();
             }}
+            onNavigateToPending={() => setActiveTab('pending')}
             showToast={showToast}
           />
         )}
@@ -94,6 +151,20 @@ export function App() {
           />
         )}
       </main>
+
+      <GoogleAuthModal
+        user={user}
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onLoginWithGoogle={handleLoginWithGoogle}
+        onLogout={handleLogout}
+        onUpdateConnectedAccounts={(accounts) => {
+          if (user) {
+            setUser({ ...user, connectedAccounts: accounts });
+          }
+        }}
+        showToast={showToast}
+      />
 
       <ToastContainer toasts={toasts} />
     </div>

@@ -3,25 +3,25 @@
    ========================================================================== */
 
 :root {
-  /* Color Palette - GitHub & X Fusion */
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
-  --bg-tertiary: #21262d;
-  --bg-elevated: #16181c;
+  /* Color Palette - X Dark Minimalist Theme */
+  --bg-primary: #000000;
+  --bg-secondary: #16181c;
+  --bg-tertiary: #16181c;
+  --bg-elevated: #202327;
   
-  --border-color: #30363d;
-  --border-subtle: #21262d;
-  --border-focus: #58a6ff;
+  --border-color: #16181c;
+  --border-subtle: #2f3336;
+  --border-focus: #1d9bf0;
 
   --text-primary: #f0f6fc;
-  --text-secondary: #8b949e;
-  --text-muted: #6e7681;
+  --text-secondary: #71767b;
+  --text-muted: #536471;
 
   --accent-github: #238636;
   --accent-github-hover: #2ea043;
   --accent-x: #1d9bf0;
   --accent-x-hover: #1a8cd8;
-  --accent-blue: #58a6ff;
+  --accent-blue: #1d9bf0;
   --accent-purple: #bc8cff;
   --accent-orange: #d29922;
   --accent-red: #f85149;
@@ -29,11 +29,11 @@
   /* Fonts & Shadows */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
 }
 
 html, body, #root {
@@ -80,7 +80,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 0;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #16181c;
   gap: 1rem;
   flex-wrap: wrap;
   width: 100%;
@@ -96,8 +96,8 @@ body {
   width: 34px;
   height: 34px;
   background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
+  border: 1px solid #2f3336;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,8 +117,8 @@ body {
   gap: 0.25rem;
   background: var(--bg-secondary);
   padding: 3px;
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border: 1px solid #16181c;
+  border-radius: 9999px;
   max-width: 100%;
 }
 
@@ -126,9 +126,9 @@ body {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--radius-sm);
-  font-size: 0.82rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
   background: transparent;
@@ -140,14 +140,13 @@ body {
 
 .nav-tab:hover {
   color: var(--text-primary);
-  background: var(--bg-tertiary);
+  background: rgba(239, 243, 244, 0.1);
 }
 
 .nav-tab.active {
   color: var(--text-primary);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  box-shadow: var(--shadow-sm);
+  background: rgba(239, 243, 244, 0.15);
+  font-weight: 700;
 }
 
 .header-status-indicators {
@@ -164,7 +163,12 @@ body {
   font-size: 0.7rem;
   font-weight: 700;
   padding: 1px 6px;
-  border-radius: 10px;
+  border-radius: 9999px;
+}
+
+/* User Profile Widget Hover */
+.user-profile-widget:hover {
+  background-color: rgba(239, 243, 244, 0.1) !important;
 }
 
 /* Main Layout */
@@ -174,13 +178,13 @@ body {
   width: 100%;
 }
 
-/* Cards & Panels */
+/* Cards & Panels - Seamless Divs without contrasting border color */
 .github-card {
   background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border: 1px solid #16181c;
+  border-radius: var(--radius-lg);
   padding: 1.1rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
   width: 100%;
   box-sizing: border-box;
   position: relative;
@@ -274,7 +278,7 @@ body {
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.85rem;
-  border-radius: var(--radius-sm);
+  border-radius: 9999px;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -287,13 +291,13 @@ body {
 }
 
 .btn-primary {
-  background-color: var(--accent-github);
-  color: #ffffff;
-  border-color: rgba(240, 246, 252, 0.1);
+  background-color: #eff3f4;
+  color: #0f1419;
+  border-color: transparent;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background-color: var(--accent-github-hover);
+  background-color: #d7dbdc;
 }
 
 .btn-x-black {
@@ -306,14 +310,14 @@ body {
 }
 
 .btn-secondary {
-  background-color: var(--bg-tertiary);
+  background-color: transparent;
   color: var(--text-primary);
-  border-color: var(--border-color);
+  border-color: #2f3336;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background-color: #30363d;
-  border-color: #8b949e;
+  background-color: rgba(239, 243, 244, 0.1);
+  border-color: #536471;
 }
 
 .btn-danger {
@@ -328,7 +332,7 @@ body {
 }
 
 .btn-sm {
-  padding: 0.3rem 0.55rem;
+  padding: 0.3rem 0.65rem;
   font-size: 0.78rem;
 }
 
@@ -337,7 +341,7 @@ body {
   cursor: not-allowed;
 }
 
-/* Inputs & Form Controls */
+/* Inputs & Form Controls - Transparent background, defined border color */
 .input-group {
   display: flex;
   flex-direction: column;
@@ -355,13 +359,13 @@ body {
 .textarea-input,
 .select-input {
   width: 100%;
-  background-color: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0.45rem 0.65rem;
+  background-color: transparent !important;
+  border: 1px solid #2f3336 !important;
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.75rem;
   color: var(--text-primary);
   font-family: inherit;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   outline: none;
   transition: border-color 0.15s ease;
   box-sizing: border-box;
@@ -370,8 +374,8 @@ body {
 .input-text:focus,
 .textarea-input:focus,
 .select-input:focus {
-  border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+  border-color: var(--accent-x) !important;
+  box-shadow: 0 0 0 2px rgba(29, 155, 240, 0.2);
 }
 
 .textarea-input {
