@@ -22,44 +22,33 @@ const PLATFORMS: { id: SocialPlatform; label: string; bg: string; badge: string;
 
 export const AddSocialAccountModal: React.FC<Props> = ({ isOpen, onClose, onAddAccount }) => {
   const [selectedPlatform, setSelectedPlatform] = useState<SocialPlatform>('linkedin');
-  const [handle, setHandle] = useState('');
-  const [profileName, setProfileName] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   if (!isOpen) return null;
 
   const selectedPlatformObj = PLATFORMS.find((p) => p.id === selectedPlatform) || PLATFORMS[0];
 
-  const handleConnectPlatform = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!handle.trim()) return;
-
+  const handleConnectOAuth = () => {
     setIsAuthenticating(true);
     setTimeout(() => {
-      const cleanHandle = handle.trim().startsWith('@') ? handle.trim() : `@${handle.trim()}`;
-      const name = profileName.trim() || cleanHandle.replace(/^@/, '');
-      const avatarUrl = `https://unavatar.io/${selectedPlatform === 'x' ? 'twitter' : selectedPlatform}/${cleanHandle.replace(/^@/, '')}`;
-
       onAddAccount({
-        name,
-        handle: cleanHandle,
+        name: `${selectedPlatformObj.label} Account`,
+        handle: `@${selectedPlatformObj.id}_user`,
         platform: selectedPlatform,
-        avatarUrl,
+        avatarUrl: `https://unavatar.io/${selectedPlatform === 'x' ? 'twitter' : selectedPlatform}/${selectedPlatformObj.id}_user`,
       });
 
       setIsAuthenticating(false);
-      setHandle('');
-      setProfileName('');
       onClose();
-    }, 600);
+    }, 700);
   };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-card publer-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header-centered">
-          <h2>Conectar Cuenta de Red Social</h2>
-          <p>Selecciona una red social e inicia sesión para vincularla de manera independiente</p>
+          <h2>Conectar Cuenta Social</h2>
+          <p>Selecciona una red social para iniciar sesión y vincular tu cuenta</p>
         </div>
 
         {/* Platform Selection Grid */}
@@ -69,11 +58,7 @@ export const AddSocialAccountModal: React.FC<Props> = ({ isOpen, onClose, onAddA
             return (
               <div
                 key={id}
-                onClick={() => {
-                  setSelectedPlatform(id);
-                  setHandle('');
-                  setProfileName('');
-                }}
+                onClick={() => setSelectedPlatform(id)}
                 className={`grid-platform-card ${isSelected ? 'selected' : ''}`}
               >
                 {isSelected && <span className="cyan-check-badge">✓</span>}
@@ -86,50 +71,31 @@ export const AddSocialAccountModal: React.FC<Props> = ({ isOpen, onClose, onAddA
           })}
         </div>
 
-        {/* Platform Specific Login / Connection Form */}
-        <form onSubmit={handleConnectPlatform} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.75rem' }}>
-          <div className="input-group">
-            <label className="input-label">Usuario / Handle en {selectedPlatformObj.label} *</label>
-            <input
-              type="text"
-              className="input-text"
-              placeholder={`Ej. @usuario_${selectedPlatformObj.id}`}
-              value={handle}
-              onChange={(e) => setHandle(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">Nombre de Perfil (Opcional)</label>
-            <input
-              type="text"
-              className="input-text"
-              placeholder="Ej. Mi Nombre / Marca"
-              value={profileName}
-              onChange={(e) => setProfileName(e.target.value)}
-            />
-          </div>
-
+        {/* Direct OAuth Connection Button - NO INPUT FIELDS */}
+        <div className="center-actions" style={{ marginTop: '1.25rem' }}>
           <button
-            type="submit"
+            type="button"
             className="btn-publer-continue"
-            disabled={isAuthenticating || !handle.trim()}
+            disabled={isAuthenticating}
+            onClick={handleConnectOAuth}
             style={{
               width: '100%',
               justifyContent: 'center',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              marginTop: '0.5rem',
+              padding: '0.75rem 1.5rem',
+              fontSize: '0.92rem',
+              background: selectedPlatformObj.bg.includes('gradient') ? '#bc1888' : selectedPlatformObj.bg,
+              color: '#ffffff',
             }}
           >
-            <LogIn size={16} />
+            <LogIn size={18} />
             {isAuthenticating
-              ? `Autenticando con ${selectedPlatformObj.label}...`
-              : `Iniciar Sesión y Vincular ${selectedPlatformObj.label}`}
+              ? `Conectando con ${selectedPlatformObj.label}...`
+              : `Iniciar Sesión con ${selectedPlatformObj.label}`}
           </button>
-        </form>
+        </div>
       </div>
     </div>
   );
