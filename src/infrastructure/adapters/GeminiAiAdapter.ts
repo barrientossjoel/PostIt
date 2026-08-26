@@ -91,6 +91,13 @@ Devuelve SOLO el texto refinado para redes sociales sin introducciones ni comill
     if (!res.ok) throw new Error(`Error al refinar en Gemini API (${res.status})`);
 
     const data = await res.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || currentContent;
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || currentContent;
+    const cleanText = text
+      .replace(/^```[a-z]*\n?/i, '')
+      .replace(/\n?```$/i, '')
+      .replace(/^"|"$/g, '')
+      .trim();
+
+    return cleanText || currentContent;
   }
 }

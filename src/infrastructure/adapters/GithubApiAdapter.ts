@@ -2,120 +2,6 @@ import type { IGithubService } from '../../core/interfaces/IGithubService';
 import type { Repository } from '../../core/entities/Repository';
 import type { Commit } from '../../core/entities/Commit';
 
-const SAMPLE_REPOS: Repository[] = [
-  {
-    id: 101,
-    name: 'Nout',
-    fullName: 'barrientossjoel/Nout',
-    isPrivate: false,
-    description: 'Plataforma colaborativa de notas y mapas de conocimiento',
-    htmlUrl: 'https://github.com/barrientossjoel/Nout',
-    defaultBranch: 'main',
-    updatedAt: '2026-07-28T14:30:00Z',
-    language: 'TypeScript',
-    stargazersCount: 12,
-  },
-  {
-    id: 102,
-    name: 'PostIt',
-    fullName: 'barrientossjoel/PostIt',
-    isPrivate: false,
-    description: 'Generador de publicaciones para redes sociales basado en GitHub commits',
-    htmlUrl: 'https://github.com/barrientossjoel/PostIt',
-    defaultBranch: 'main',
-    updatedAt: '2026-08-25T18:00:00Z',
-    language: 'TypeScript',
-    stargazersCount: 45,
-  },
-  {
-    id: 103,
-    name: 'Galan',
-    fullName: 'barrientossjoel/Galan',
-    isPrivate: true,
-    description: 'Sitio web corporativo e interfaz interactiva',
-    htmlUrl: 'https://github.com/barrientossjoel/Galan',
-    defaultBranch: 'main',
-    updatedAt: '2026-06-10T12:00:00Z',
-    language: 'HTML',
-    stargazersCount: 3,
-  },
-  {
-    id: 104,
-    name: 'Digital-Impulso',
-    fullName: 'barrientossjoel/Digital-Impulso',
-    isPrivate: false,
-    description: 'Landing page y dashboard de servicios digitales',
-    htmlUrl: 'https://github.com/barrientossjoel/Digital-Impulso',
-    defaultBranch: 'main',
-    updatedAt: '2026-05-20T09:00:00Z',
-    language: 'CSS',
-    stargazersCount: 8,
-  },
-];
-
-const SAMPLE_COMMITS_MAP: { [repoFullName: string]: Commit[] } = {
-  'barrientossjoel/Nout': [
-    {
-      sha: '1b407f0',
-      message: 'chore: add Open Graph meta tags for Nout',
-      author: { name: 'barrientossjoel', email: 'joel@example.com', date: '2026-07-28T14:30:00Z' },
-      htmlUrl: 'https://github.com/barrientossjoel/Nout/commit/1b407f0',
-      repoFullName: 'barrientossjoel/Nout',
-    },
-    {
-      sha: '14cd788',
-      message: 'Update README with new project details',
-      author: { name: 'barrientossjoel', email: 'joel@example.com', date: '2026-07-28T12:00:00Z' },
-      htmlUrl: 'https://github.com/barrientossjoel/Nout/commit/14cd788',
-      repoFullName: 'barrientossjoel/Nout',
-    },
-    {
-      sha: '64aa0bf',
-      message: 'UI: Refine sidebar layout, responsive breadcrumb truncation and spacing',
-      author: { name: 'barrientossjoel', email: 'joel@example.com', date: '2026-06-24T16:45:00Z' },
-      htmlUrl: 'https://github.com/barrientossjoel/Nout/commit/64aa0bf',
-      repoFullName: 'barrientossjoel/Nout',
-    },
-    {
-      sha: 'cfe5077',
-      message: 'fix(collab): proxy WS through Vite in dev and fix PartyKit setup',
-      author: { name: 'barrientossjoel', email: 'joel@example.com', date: '2026-06-15T10:15:00Z' },
-      htmlUrl: 'https://github.com/barrientossjoel/Nout/commit/cfe5077',
-      repoFullName: 'barrientossjoel/Nout',
-    },
-    {
-      sha: 'b3de4e5',
-      message: 'TEAM_001: Fix collaboration synchronization issues across devices and browsers',
-      author: { name: 'barrientossjoel', email: 'joel@example.com', date: '2026-06-15T09:30:00Z' },
-      htmlUrl: 'https://github.com/barrientossjoel/Nout/commit/b3de4e5',
-      repoFullName: 'barrientossjoel/Nout',
-    },
-  ],
-  'barrientossjoel/PostIt': [
-    {
-      sha: 'a9f82c1',
-      message: 'feat(explorer): implement github pagination and responsive mobile flow',
-      author: { name: 'barrientossjoel', email: 'joel@example.com', date: '2026-08-25T18:00:00Z' },
-      htmlUrl: 'https://github.com/barrientossjoel/PostIt/commit/a9f82c1',
-      repoFullName: 'barrientossjoel/PostIt',
-    },
-    {
-      sha: '9c73b1a',
-      message: 'refactor(ui): update commit cards background and custom dark checkboxes',
-      author: { name: 'barrientossjoel', email: 'joel@example.com', date: '2026-08-25T17:30:00Z' },
-      htmlUrl: 'https://github.com/barrientossjoel/PostIt/commit/9c73b1a',
-      repoFullName: 'barrientossjoel/PostIt',
-    },
-    {
-      sha: 'e4d812f',
-      message: 'feat(core): setup clean architecture and screaming domain structure',
-      author: { name: 'barrientossjoel', email: 'joel@example.com', date: '2026-08-25T14:00:00Z' },
-      htmlUrl: 'https://github.com/barrientossjoel/PostIt/commit/e4d812f',
-      repoFullName: 'barrientossjoel/PostIt',
-    },
-  ],
-};
-
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
@@ -146,7 +32,7 @@ export class GithubApiAdapter implements IGithubService {
 
   async verifyToken(token: string): Promise<{ username: string; avatarUrl: string }> {
     if (!token) {
-      return { username: 'barrientossjoel', avatarUrl: 'https://github.com/barrientossjoel.png' };
+      throw new Error('No se ha configurado un token de GitHub');
     }
 
     const cacheKey = `user:${token}`;
@@ -178,7 +64,7 @@ export class GithubApiAdapter implements IGithubService {
 
   async fetchUserRepositories(token: string): Promise<Repository[]> {
     if (!token) {
-      return SAMPLE_REPOS;
+      return [];
     }
 
     const cacheKey = `repos:${token}`;
@@ -196,12 +82,12 @@ export class GithubApiAdapter implements IGithubService {
       });
 
       if (!res.ok) {
-        return SAMPLE_REPOS;
+        return [];
       }
 
       const data = await res.json();
       if (!Array.isArray(data)) {
-        return SAMPLE_REPOS;
+        return [];
       }
 
       const repos: Repository[] = data.map((repo: any) => ({
@@ -220,7 +106,7 @@ export class GithubApiAdapter implements IGithubService {
       this.setToCache(cacheKey, repos);
       return repos;
     } catch {
-      return SAMPLE_REPOS;
+      return [];
     }
   }
 
@@ -231,25 +117,14 @@ export class GithubApiAdapter implements IGithubService {
     page: number = 1,
     sortOrder: 'desc' | 'asc' = 'desc'
   ): Promise<Commit[]> {
+    if (!token || !repoFullName) {
+      return [];
+    }
+
     const cacheKey = `commits:${repoFullName}:${limit}:${page}:${sortOrder}`;
     const cachedCommits = this.getFromCache<Commit[]>(cacheKey);
     if (cachedCommits) {
       return cachedCommits;
-    }
-
-    const getSampleData = () => {
-      const raw = SAMPLE_COMMITS_MAP[repoFullName] || SAMPLE_COMMITS_MAP['barrientossjoel/Nout'];
-      const sorted = [...raw].sort((a, b) => {
-        const tA = new Date(a.author.date).getTime();
-        const tB = new Date(b.author.date).getTime();
-        return sortOrder === 'desc' ? tB - tA : tA - tB;
-      });
-      const start = (page - 1) * limit;
-      return sorted.slice(start, start + limit);
-    };
-
-    if (!token) {
-      return getSampleData();
     }
 
     try {
@@ -264,12 +139,12 @@ export class GithubApiAdapter implements IGithubService {
       );
 
       if (!res.ok) {
-        return getSampleData();
+        return [];
       }
 
       const data = await res.json();
       if (!Array.isArray(data)) {
-        return getSampleData();
+        return [];
       }
 
       const mapped: Commit[] = data.map((item: any) => ({
@@ -294,7 +169,7 @@ export class GithubApiAdapter implements IGithubService {
       this.setToCache(cacheKey, mapped);
       return mapped;
     } catch {
-      return getSampleData();
+      return [];
     }
   }
 }

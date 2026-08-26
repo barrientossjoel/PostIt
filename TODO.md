@@ -4,6 +4,7 @@
 - [x] Initial project setup with Vite + React + TypeScript + Bun (`/mnt/Disco_SDB/Workspace/PostIt`).
 - [x] Clean & Screaming Architecture layer separation (`core/entities`, `core/interfaces`, `core/usecases`, `infrastructure/adapters`, `infrastructure/publishing`, `features/*`).
 - [x] Autenticación con Google y Perfil de Usuario Personal (`GoogleAuthModal.tsx`, `User.ts`, `session state` en LocalStorage): Conexión de perfil Google con foto, nombre, tokens de GitHub, Gemini API key y cuentas de redes sociales conectadas (𝕏, LinkedIn, Facebook).
+- [x] Autenticación Obligatoria y Aislamiento de Datos de Ejemplo en Producción (`App.tsx`, `LocalStorageRepository.ts`, `GithubApiAdapter.ts`, `AuthBanner.tsx`): Garantiza que sin sesión activa de Google (`user === null`) no se precarguen datos de prueba, repositorios simulados ni sesiones de prueba en producción, solicitando al usuario iniciar sesión.
 - [x] Traducción Gratuita de Commits a Español Sin IA (`FreeTranslationAdapter.ts`): Motor de traducción a 0 costo (diccionario de convenciones dev + API pública de traducción MyMemory sin requirimiento de tokens ni consumo de cuota) con botón `🌐 Traducir a Español (Gratis)` en el Editor.
 - [x] Botón Cancelar y Devolver a Pendientes (`❌ Cancelar p/ Pendientes`): Permite cancelar la edición actual devolviendo el borrador a la cola de pendientes (`status: 'pending'`) y navegando automáticamente de regreso.
 - [x] Auto-Recorte Inteligente a 280 Caracteres (`✂️ Recortar a 280 chars`): Detecta alertas de desbordamiento de caracteres para X/Twitter y trunca inteligentemente el texto respetando hashtags y frases completas.
@@ -27,5 +28,5 @@
 - [x] Breadcrumb bar: `Repositorios` > `usuario/repo` with mobile 2-step navigation.
 - [x] Minimalist commits header: Eliminated redundant repo subtitles, clean single-row header with `←` back button and badge.
 - [x] GitHub-styled commit cards: Integrated background matching (`var(--bg-secondary)`), date grouping, author avatars, and `...` expand button for commit bodies.
-- [x] Custom dark checkboxes: Styled checkboxes slightly darker (`#0b0e14`) with custom checkmark.
-- [x] Production build verification (`bun run build`).
+- [x] Sticky Floating Button & Direct Commit Post Generation (`RepoExplorerContainer.tsx`, `useRepoExplorer.ts`, `PostPreviewContainer.tsx`): Botón `Generar Post en Preview` fijado abajo a la derecha (*sticky*). Generación instantánea local de posts en texto plano directo desde commits (sin JSON ni llamadas obligatorias a IA), reservando la IA exclusivamente para el nuevo botón `✨ Redactar / Estructurar con IA` en el Editor.
+- [x] Auto-Monitoreo de Repos y Selección Múltiple en Pendientes (`ScanPendingCommitsUseCase.ts`, `PendingQueueContainer.tsx`, `usePendingQueue.ts`): Todos los repositorios habilitados por defecto sin casillas individuales. Selección múltiple de tarjetas en Pendientes con botón flotante en viewport (`zIndex: 9999`) para generar borradores combinados en Preview sin llamadas a APIs.
