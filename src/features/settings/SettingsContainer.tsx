@@ -368,6 +368,7 @@ export const SettingsContainer: React.FC<Props> = ({
         onClose={() => setIsAddModalOpen(false)}
         onAddAccount={handleAddAccount}
         user={user}
+        publerApiKey={settings.publerApiKey}
       />
     </div>
   );

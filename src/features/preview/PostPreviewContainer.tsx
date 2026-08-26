@@ -219,6 +219,7 @@ export const PostPreviewContainer: React.FC<Props> = ({
         onClose={() => setIsAddAccountOpen(false)}
         onAddAccount={handleAddAccount}
         user={user}
+        publerApiKey={settings.publerApiKey}
       />
 
       {/* Share Modal */}
