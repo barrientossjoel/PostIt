@@ -4,7 +4,6 @@ import type { Commit } from '../../../core/entities/Commit';
 import type { Post } from '../../../core/entities/Post';
 import type { AppSettings } from '../../../core/entities/Settings';
 import { container } from '../../../infrastructure/container';
-import { GeneratePostFromCommitsUseCase } from '../../../core/usecases/GeneratePostFromCommitsUseCase';
 import { ScanPendingCommitsUseCase } from '../../../core/usecases/ScanPendingCommitsUseCase';
 
 export function useRepoExplorer(
@@ -29,7 +28,6 @@ export function useRepoExplorer(
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'public' | 'private'>('all');
   const [scanning, setScanning] = useState(false);
-  const [generatingPost, setGeneratingPost] = useState(false);
 
   // Mobile Navigation Step: 'repos' | 'commits'
   const [mobileStep, setMobileStep] = useState<'repos' | 'commits'>('repos');
@@ -146,20 +144,19 @@ export function useRepoExplorer(
   };
 
   const scanForPendings = async () => {
-    if (settings.enabledRepoIds.length === 0) {
-      showToast('Selecciona al menos un repositorio para monitorear con la casilla ✔', 'error');
+    if (repos.length === 0) {
+      showToast('No hay repositorios disponibles para escanear', 'error');
       return;
     }
     setScanning(true);
     try {
-      const monitoredRepos = repos.filter((r) => settings.enabledRepoIds.includes(r.id));
       const scanUseCase = new ScanPendingCommitsUseCase(
         container.githubService,
         container.aiGeneratorService,
         container.postRepository
       );
-      const generatedPosts = await scanUseCase.execute({ repos: monitoredRepos, settings });
-      showToast(`Escaneo finalizado: ${generatedPosts.length} nuevo(s) borrador(es)`, 'success');
+      const generatedPosts = await scanUseCase.execute({ repos, settings });
+      showToast(`Escaneo finalizado: ${generatedPosts.length} nuevo(s) borrador(es) en Pendientes`, 'success');
     } catch (err: any) {
       showToast(err.message, 'error');
     } finally {
@@ -167,29 +164,51 @@ export function useRepoExplorer(
     }
   };
 
-  const generatePostFromSelectedCommits = async () => {
+  const generatePostFromSelectedCommits = () => {
     if (!selectedRepo || selectedCommitShas.length === 0) return;
 
     const selectedCommits = commits.filter((c) => selectedCommitShas.includes(c.sha));
-    setGeneratingPost(true);
 
-    try {
-      const useCase = new GeneratePostFromCommitsUseCase(
-        container.aiGeneratorService,
-        container.postRepository
-      );
-      const post = await useCase.execute({
-        commits: selectedCommits,
-        repoName: selectedRepo.fullName,
-        settings,
-      });
-      onPostGenerated(post);
-      showToast('Post generado con éxito en el Editor', 'success');
-    } catch (err: any) {
-      showToast(err.message, 'error');
-    } finally {
-      setGeneratingPost(false);
+    let contentText = '';
+    let postTitle = '';
+
+    if (selectedCommits.length === 1) {
+      const c = selectedCommits[0];
+      const lines = c.message.split('\n');
+      const title = lines[0] || '';
+      const body = lines.slice(1).join('\n').trim();
+
+      postTitle = `${selectedRepo.name}: ${title}`;
+      contentText = body
+        ? `🚀 Update en ${selectedRepo.name}:\n\n${title}\n\n${body}`
+        : `🚀 Update en ${selectedRepo.name}:\n\n${title}`;
+    } else {
+      postTitle = `Actualización de ${selectedRepo.name} (${selectedCommits.length} commits)`;
+      const items = selectedCommits
+        .map((c) => {
+          const title = c.message.split('\n')[0];
+          return `• ${title}`;
+        })
+        .join('\n');
+      contentText = `🚀 Updates en ${selectedRepo.name}:\n\n${items}`;
     }
+
+    const newPost: Post = {
+      id: `post_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      repoFullName: selectedRepo.fullName,
+      commits: selectedCommits,
+      title: postTitle,
+      content: contentText,
+      hashtags: ['#BuildInPublic', '#DevUpdate'],
+      status: 'draft',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      aiTone: settings.aiTone,
+    };
+
+    container.postRepository.savePost(newPost);
+    onPostGenerated(newPost);
+    showToast('Post en borrador generado desde los commits', 'success');
   };
 
   const filteredRepos = repos.filter((r) => {
@@ -216,7 +235,6 @@ export function useRepoExplorer(
     filterType,
     setFilterType,
     scanning,
-    generatingPost,
     mobileStep,
     setMobileStep,
     loadRepos,

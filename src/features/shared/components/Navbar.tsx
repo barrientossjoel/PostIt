@@ -1,8 +1,7 @@
 import React from 'react';
 import type { AppSettings } from '../../../core/entities/Settings';
 import type { UserProfile } from '../../../core/entities/User';
-import { Share2, GitCommit, Inbox, Edit3, Settings as SettingsIcon, LogIn, MoreHorizontal } from 'lucide-react';
-
+import { Share2, GitCommit, Inbox, Edit3, Settings as SettingsIcon, LogIn } from 'lucide-react';
 
 export type TabId = 'explorer' | 'pending' | 'preview' | 'settings';
 
@@ -12,7 +11,7 @@ interface Props {
   pendingCount: number;
   settings: AppSettings;
   user: UserProfile | null;
-  onOpenGoogleAuth: () => void;
+  onOpenAuth: () => void;
 }
 
 export const Navbar: React.FC<Props> = ({
@@ -21,63 +20,22 @@ export const Navbar: React.FC<Props> = ({
   pendingCount,
   settings,
   user,
-  onOpenGoogleAuth,
+  onOpenAuth,
 }) => {
   const isGithubConfigured = Boolean(settings.githubToken);
   const isGeminiConfigured = Boolean(settings.geminiApiKey);
 
   return (
     <header className="app-header">
-      <div className="header-top-row">
-        <div className="brand-logo">
-          <div className="brand-icon">
-            <Share2 size={20} />
-          </div>
-          <h1 className="brand-title">PostIt</h1>
+      {/* Brand Logo Top Left */}
+      <div className="brand-logo">
+        <div className="brand-icon">
+          <Share2 size={20} />
         </div>
-
-        {/* Google Authentication / User Profile Widget (Top Row Right) */}
-        <button
-          className="user-profile-widget"
-          onClick={onOpenGoogleAuth}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            padding: '6px 12px',
-            borderRadius: '9999px',
-            background: 'transparent',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'background-color 0.15s ease',
-          }}
-        >
-          {user ? (
-            <>
-              <img
-                src={user.avatarUrl}
-                alt={user.name}
-                style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid var(--border-color)', objectFit: 'cover' }}
-              />
-              <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'left', lineHeight: 1.2 }}>
-                <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  {user.name}
-                </span>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                  {user.handle || `@${user.email.split('@')[0]}`}
-                </span>
-              </div>
-              <MoreHorizontal size={16} color="var(--text-primary)" style={{ marginLeft: '6px' }} />
-            </>
-          ) : (
-            <>
-              <LogIn size={15} color="var(--accent-x)" />
-              <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)' }}>Google Login</span>
-            </>
-          )}
-        </button>
+        <h1 className="brand-title">PostIt</h1>
       </div>
 
+      {/* Centered Navigation Tabs */}
       <nav className="nav-tabs">
         <button
           className={`nav-tab ${activeTab === 'explorer' ? 'active' : ''}`}
@@ -115,6 +73,40 @@ export const Navbar: React.FC<Props> = ({
           )}
         </button>
       </nav>
+
+      {/* Auth / Profile Area Top Right */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        {user ? (
+          <button
+            type="button"
+            className="account-item-row"
+            onClick={onOpenAuth}
+            title="Gestionar Perfil y Cuentas de Google"
+            style={{ padding: '4px 10px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-input)', borderRadius: '9999px' }}
+          >
+            <img
+              src={user.avatarUrl}
+              alt={user.name}
+              className="account-avatar"
+              style={{ width: '26px', height: '26px' }}
+            />
+            <span className="account-name selected-text hide-mobile" style={{ fontSize: '0.82rem' }}>
+              {user.name}
+            </span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            onClick={onOpenAuth}
+          >
+            <LogIn size={15} color="var(--accent-x)" />
+            <span>Iniciar Sesión</span>
+          </button>
+        )}
+      </div>
     </header>
   );
 };
+
+

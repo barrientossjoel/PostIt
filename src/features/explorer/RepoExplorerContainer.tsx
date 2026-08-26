@@ -7,8 +7,6 @@ import {
   Search,
   FolderGit2,
   GitCommit,
-  CheckSquare,
-  Square,
   RefreshCw,
   Sparkles,
   Lock,
@@ -186,7 +184,6 @@ export const RepoExplorerContainer: React.FC<Props> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', maxHeight: 'calc(100vh - 280px)', overflowY: 'auto' }}>
             {explorer.repos.map((repo) => {
               const isSelected = explorer.selectedRepo?.id === repo.id;
-              const isAutoScanEnabled = settings.enabledRepoIds.includes(repo.id);
 
               return (
                 <div
@@ -223,16 +220,6 @@ export const RepoExplorerContainer: React.FC<Props> = ({
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        explorer.toggleAutoScanRepo(repo.id);
-                      }}
-                      title={isAutoScanEnabled ? 'Monitoreo auto activo' : 'Click para monitorear'}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: isAutoScanEnabled ? 'var(--accent-x)' : 'var(--text-muted)' }}
-                    >
-                      {isAutoScanEnabled ? <CheckSquare size={16} /> : <Square size={16} />}
-                    </button>
                     <ChevronRight size={14} color="var(--text-muted)" />
                   </div>
                 </div>
@@ -530,34 +517,39 @@ export const RepoExplorerContainer: React.FC<Props> = ({
               {explorer.selectedCommitShas.length > 0 && (
                 <div
                   style={{
-                    marginTop: 'auto',
-                    padding: '0.85rem 1rem',
+                    position: 'fixed',
+                    bottom: '1.5rem',
+                    right: '1.5rem',
+                    zIndex: 9999,
+                    padding: '0.85rem 1.25rem',
                     background: 'var(--bg-tertiary)',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--accent-blue)',
+                    borderRadius: 'var(--radius-md, 10px)',
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    gap: '0.75rem',
+                    gap: '1rem',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
+                    backdropFilter: 'blur(12px)',
+                    maxWidth: 'calc(100vw - 3rem)',
                   }}
                 >
                   <div>
-                    <span style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                       {explorer.selectedCommitShas.length} commit(s) seleccionado(s)
                     </span>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                      Generar borrador inteligente con IA
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>
+                      Borrador directo desde el nombre y mensaje
                     </p>
                   </div>
 
                   <button
                     className="btn btn-primary"
                     onClick={explorer.generatePostFromSelectedCommits}
-                    disabled={explorer.generatingPost}
+                    style={{ fontWeight: 600 }}
                   >
-                    <Sparkles size={15} />
-                    {explorer.generatingPost ? 'Generando...' : 'Generar Post en Preview'}
+                    Generar Post en Preview
                     <ArrowRight size={15} />
                   </button>
                 </div>
