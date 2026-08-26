@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { UserProfile } from '../../core/entities/User';
-import { LogIn, LogOut, CheckCircle2, Globe, Shield, Key, Sparkles, UserCheck } from 'lucide-react';
+import { LogIn, LogOut, CheckCircle2, Globe, Shield, Key } from 'lucide-react';
 
 interface Props {
   user: UserProfile | null;
@@ -231,36 +231,7 @@ export const GoogleAuthModal: React.FC<Props> = ({
               </div>
             </div>
 
-            {/* Quick Google Account Switcher */}
-            <div>
-              <h4 style={{ fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.65rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <UserCheck size={16} color="var(--accent-x)" /> Selector Rápido de Cuentas (Google Chooser)
-              </h4>
-              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <button
-                  className="btn btn-sm btn-secondary"
-                  style={{ fontSize: '0.8rem', gap: '6px' }}
-                  onClick={() => {
-                    onLoginWithGoogle('joel.barrientos@gmail.com', 'Joel Barrientos', 'https://github.com/barrientossjoel.png');
-                    showToast('Cambiado a joel.barrientos@gmail.com', 'success');
-                  }}
-                >
-                  <img src="https://github.com/barrientossjoel.png" style={{ width: '18px', height: '18px', borderRadius: '50%' }} alt="Joel" />
-                  Joel Barrientos
-                </button>
-                <button
-                  className="btn btn-sm btn-secondary"
-                  style={{ fontSize: '0.8rem', gap: '6px' }}
-                  onClick={() => {
-                    onLoginWithGoogle('barrientossjoel@gmail.com', 'Joel Barrientos Dev', 'https://api.dicebear.com/7.x/bottts/svg?seed=barrientossjoel');
-                    showToast('Cambiado a barrientossjoel@gmail.com', 'success');
-                  }}
-                >
-                  <Sparkles size={14} color="#ea4335" />
-                  barrientossjoel@gmail.com
-                </button>
-              </div>
-            </div>
+
 
             {/* Connected Social Networks (Publer-style integration) */}
             <div>

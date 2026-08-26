@@ -8,86 +8,40 @@ import { Navbar } from './features/shared/components/Navbar';
 import type { TabId } from './features/shared/components/Navbar';
 import { ToastContainer } from './features/shared/components/Toast';
 import type { ToastMessage } from './features/shared/components/Toast';
+import { GoogleAuthModal } from './features/auth/GoogleAuthModal';
 
 import { RepoExplorerContainer } from './features/explorer/RepoExplorerContainer';
 import { PendingQueueContainer } from './features/pending/PendingQueueContainer';
 import { PostPreviewContainer } from './features/preview/PostPreviewContainer';
 import { SettingsContainer } from './features/settings/SettingsContainer';
-import { GoogleAuthModal } from './features/auth/GoogleAuthModal';
 
-const DEFAULT_GOOGLE_USER: UserProfile = {
-  id: 'usr_google_001',
-  email: 'joel.barrientos@gmail.com',
-  name: 'Joe',
-  handle: '@jbardev',
-  avatarUrl: 'https://github.com/barrientossjoel.png',
-  provider: 'google',
-  connectedAccounts: {
-    x: true,
-    linkedin: true,
-    facebook: false,
-  },
-};
-
+const SESSION_KEY = 'postit_user_session';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<TabId>('explorer');
 
-  // User Google Auth state
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    const saved = localStorage.getItem('postit_user_session');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return DEFAULT_GOOGLE_USER;
-      }
-    }
-    return DEFAULT_GOOGLE_USER;
-  });
-
   const [settings, setSettings] = useState<AppSettings>(() =>
-    container.settingsRepository.getSettings(user?.id)
+    container.settingsRepository.getSettings()
   );
   const [currentPost, setCurrentPost] = useState<Post | null>(null);
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // User Authentication State (Starts clean / null until authenticated)
+  const [user, setUser] = useState<UserProfile | null>(() => {
+    try {
+      const saved = localStorage.getItem(SESSION_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // Ignore
+    }
+    return null;
+  });
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
     updatePendingCount();
   }, [activeTab]);
-
-  useEffect(() => {
-    if (user) {
-      const userSettings = container.settingsRepository.getSettings(user.id);
-      const mergedSettings: AppSettings = {
-        ...userSettings,
-        githubToken: user.githubToken || userSettings.githubToken || settings.githubToken,
-        geminiApiKey: user.geminiApiKey || userSettings.geminiApiKey || settings.geminiApiKey,
-        publerApiKey: user.publerApiKey || userSettings.publerApiKey || settings.publerApiKey,
-        publerWorkspaceId: user.publerWorkspaceId || userSettings.publerWorkspaceId || settings.publerWorkspaceId,
-        aiTone: user.aiTone || userSettings.aiTone || settings.aiTone,
-        aiLanguage: user.aiLanguage || userSettings.aiLanguage || settings.aiLanguage,
-      };
-      setSettings(mergedSettings);
-      container.settingsRepository.saveSettings(mergedSettings, user.id);
-      localStorage.setItem(
-        'postit_user_session',
-        JSON.stringify({
-          ...user,
-          githubToken: mergedSettings.githubToken,
-          geminiApiKey: mergedSettings.geminiApiKey,
-          publerApiKey: mergedSettings.publerApiKey,
-          publerWorkspaceId: mergedSettings.publerWorkspaceId,
-          aiTone: mergedSettings.aiTone,
-          aiLanguage: mergedSettings.aiLanguage,
-        })
-      );
-    } else {
-      localStorage.removeItem('postit_user_session');
-    }
-  }, [user?.id]);
 
   const updatePendingCount = () => {
     const allPosts = container.postRepository.getAllPosts();
@@ -105,51 +59,34 @@ export function App() {
 
   const handleSettingsSaved = (newSettings: AppSettings) => {
     setSettings(newSettings);
-    container.settingsRepository.saveSettings(newSettings, user?.id);
-    if (user) {
-      const updatedUser: UserProfile = {
-        ...user,
-        githubToken: newSettings.githubToken,
-        geminiApiKey: newSettings.geminiApiKey,
-        publerApiKey: newSettings.publerApiKey,
-        publerWorkspaceId: newSettings.publerWorkspaceId,
-        aiTone: newSettings.aiTone,
-        aiLanguage: newSettings.aiLanguage,
-      };
-      setUser(updatedUser);
-    }
+    container.settingsRepository.saveSettings(newSettings);
   };
 
-  const handleLoginWithGoogle = (email?: string, name?: string, avatarUrl?: string) => {
-    const activeSettings = container.settingsRepository.getSettings(user?.id);
-    const userEmail = email || 'joel.barrientos@gmail.com';
-    const userId = `usr_google_${userEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+  const handleLoginWithGoogle = (email: string, name: string, avatarUrl?: string) => {
     const newUser: UserProfile = {
-      id: userId,
-      email: userEmail,
-      name: name || userEmail.split('@')[0],
-      avatarUrl: avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${userEmail}`,
+      id: `usr_${Date.now()}`,
+      email,
+      name,
+      avatarUrl: avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${email}`,
       provider: 'google',
-      githubToken: activeSettings.githubToken,
-      geminiApiKey: activeSettings.geminiApiKey,
-      publerApiKey: activeSettings.publerApiKey,
-      publerWorkspaceId: activeSettings.publerWorkspaceId,
-      aiTone: activeSettings.aiTone,
-      aiLanguage: activeSettings.aiLanguage,
-      connectedAccounts: {
-        x: true,
-        linkedin: true,
-        facebook: true,
-      },
+      connectedAccounts: user?.connectedAccounts || { x: true, linkedin: true, facebook: false },
     };
     setUser(newUser);
-    container.settingsRepository.saveSettings(activeSettings, userId);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(newUser));
   };
 
   const handleLogout = () => {
     setUser(null);
-    showToast('Sesión de Google cerrada', 'info');
+    localStorage.removeItem(SESSION_KEY);
+    showToast('Sesión cerrada correctamente', 'info');
     setIsAuthModalOpen(false);
+  };
+
+  const handleUpdateConnectedAccounts = (accounts: UserProfile['connectedAccounts']) => {
+    if (!user) return;
+    const updated = { ...user, connectedAccounts: accounts };
+    setUser(updated);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
   };
 
   return (
@@ -160,7 +97,7 @@ export function App() {
         pendingCount={pendingCount}
         settings={settings}
         user={user}
-        onOpenGoogleAuth={() => setIsAuthModalOpen(true)}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
       />
 
       <main className="main-content">
@@ -189,6 +126,7 @@ export function App() {
           <PostPreviewContainer
             currentPost={currentPost}
             settings={settings}
+            user={user}
             onPostUpdated={(post) => {
               setCurrentPost(post);
               updatePendingCount();
@@ -201,6 +139,7 @@ export function App() {
         {activeTab === 'settings' && (
           <SettingsContainer
             settings={settings}
+            user={user}
             onSettingsSaved={handleSettingsSaved}
             showToast={showToast}
           />
@@ -213,11 +152,7 @@ export function App() {
         onClose={() => setIsAuthModalOpen(false)}
         onLoginWithGoogle={handleLoginWithGoogle}
         onLogout={handleLogout}
-        onUpdateConnectedAccounts={(accounts) => {
-          if (user) {
-            setUser({ ...user, connectedAccounts: accounts });
-          }
-        }}
+        onUpdateConnectedAccounts={handleUpdateConnectedAccounts}
         showToast={showToast}
       />
 
@@ -227,3 +162,4 @@ export function App() {
 }
 
 export default App;
+
