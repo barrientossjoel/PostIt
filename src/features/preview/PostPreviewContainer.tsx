@@ -64,27 +64,7 @@ export const PostPreviewContainer: React.FC<Props> = ({
     localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
   }, [accounts]);
 
-  // Initial account hydration from GitHub token if empty
-  useEffect(() => {
-    if (accounts.length === 0 && settings.githubToken) {
-      let active = true;
-      container.githubService.verifyToken(settings.githubToken).then((res) => {
-        if (active) {
-          setAccounts([
-            {
-              id: `acc_github_${Date.now()}`,
-              name: res.username,
-              handle: res.username,
-              platform: 'linkedin',
-              avatarUrl: res.avatarUrl || `https://unavatar.io/github/${res.username}`,
-              selected: true,
-            },
-          ]);
-        }
-      }).catch(() => {});
-      return () => { active = false; };
-    }
-  }, [settings.githubToken, accounts.length]);
+
 
   const activeAccount = accounts.find((a) => a.selected) || accounts[0];
 
@@ -229,8 +209,7 @@ export const PostPreviewContainer: React.FC<Props> = ({
       <SocialCardSimulator
         post={currentPost}
         content={preview.content}
-        githubUser={activeAccount ? activeAccount.name : ''}
-        githubAvatar={activeAccount ? activeAccount.avatarUrl : undefined}
+        activeAccount={activeAccount}
         onSmartTrim={handleSmartTrim}
       />
 

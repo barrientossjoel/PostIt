@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Post } from '../../../core/entities/Post';
+import type { SocialAccount } from '../types/SocialAccount';
 import {
   MessageSquare,
   Heart,
@@ -22,6 +23,7 @@ interface Props {
   post: Post | null;
   content: string;
   hashtags?: string[];
+  activeAccount?: SocialAccount;
   githubUser?: string;
   githubAvatar?: string;
   onSmartTrim?: () => void;
@@ -30,12 +32,21 @@ interface Props {
 export const SocialCardSimulator: React.FC<Props> = ({
   post,
   content,
+  activeAccount,
   githubUser = '',
   githubAvatar,
   onSmartTrim,
 }) => {
-  const [activePlatform, setActivePlatform] = useState<'linkedin' | 'x' | 'facebook'>('linkedin');
+  const [activePlatform, setActivePlatform] = useState<'linkedin' | 'x' | 'facebook'>('x');
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+
+  useEffect(() => {
+    if (activeAccount?.platform) {
+      if (activeAccount.platform === 'linkedin' || activeAccount.platform === 'x') {
+        setActivePlatform(activeAccount.platform);
+      }
+    }
+  }, [activeAccount?.platform]);
 
   const charCount = content.length;
   const platformLimits: Record<'linkedin' | 'x' | 'facebook', number> = {
@@ -46,8 +57,19 @@ export const SocialCardSimulator: React.FC<Props> = ({
   const limit = platformLimits[activePlatform];
   const isOverLimit = charCount > limit;
 
-  const displayName = githubUser.trim() || 'Cuenta Conectada';
-  const handleName = githubUser.trim() ? `@${githubUser.toLowerCase().replace(/\s+/g, '')}` : '@cuenta';
+  const displayName = activeAccount
+    ? activeAccount.name
+    : githubUser.trim()
+    ? githubUser
+    : 'Sin cuenta vinculada';
+
+  const handleName = activeAccount
+    ? (activeAccount.handle.startsWith('@') ? activeAccount.handle : `@${activeAccount.handle}`)
+    : githubUser.trim()
+    ? `@${githubUser.toLowerCase().replace(/\s+/g, '')}`
+    : '@sin_cuenta';
+
+  const avatarUrl = activeAccount?.avatarUrl || githubAvatar;
 
   return (
     <div
@@ -194,9 +216,9 @@ export const SocialCardSimulator: React.FC<Props> = ({
         >
           {/* User Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '0.75rem' }}>
-            {githubAvatar ? (
+            {avatarUrl ? (
               <img
-                src={githubAvatar}
+                src={avatarUrl}
                 alt={displayName}
                 style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
               />
