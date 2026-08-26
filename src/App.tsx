@@ -120,14 +120,15 @@ export function App() {
     }
   };
 
-  const handleLoginWithGoogle = (email?: string, name?: string) => {
+  const handleLoginWithGoogle = (email?: string, name?: string, avatarUrl?: string) => {
     const activeSettings = container.settingsRepository.getSettings(user?.id);
-    const userId = `usr_google_${email ? email.replace(/[^a-zA-Z0-9]/g, '_') : 'default'}`;
+    const userEmail = email || 'joel.barrientos@gmail.com';
+    const userId = `usr_google_${userEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
     const newUser: UserProfile = {
       id: userId,
-      email: email || 'joel.barrientos@gmail.com',
-      name: name || 'Joel Barrientos',
-      avatarUrl: 'https://github.com/barrientossjoel.png',
+      email: userEmail,
+      name: name || userEmail.split('@')[0],
+      avatarUrl: avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${userEmail}`,
       provider: 'google',
       githubToken: activeSettings.githubToken,
       geminiApiKey: activeSettings.geminiApiKey,
