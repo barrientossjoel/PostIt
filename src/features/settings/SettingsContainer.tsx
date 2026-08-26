@@ -1,7 +1,7 @@
 import React from 'react';
 import type { AppSettings } from '../../core/entities/Settings';
 import { useSettings } from './hooks/useSettings';
-import { Key, Save, ExternalLink, ShieldCheck, Sparkles, Share2, Check } from 'lucide-react';
+import { Key, Save, ExternalLink, ShieldCheck, Sparkles, Share2, Check, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface Props {
   settings: AppSettings;
@@ -17,16 +17,51 @@ export const SettingsContainer: React.FC<Props> = ({
   const { form, updateField, testingGithub, githubUser, testGithubToken, saveSettings } =
     useSettings(settings, onSettingsSaved, showToast);
 
+  const isGithubConfigured = Boolean(settings.githubToken);
+  const isGeminiConfigured = Boolean(settings.geminiApiKey);
+
   return (
     <div className="animate-fade-in" style={{ maxWidth: '720px', margin: '0 auto' }}>
       <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.85rem' }}>
-          <Key size={24} color="var(--accent-blue)" />
-          <div>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Configuración y Credenciales</h2>
-            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Tus credenciales se guardan localmente en tu navegador de forma 100% segura.
-            </p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.85rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Key size={24} color="var(--accent-blue)" />
+            <div>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Configuración y Credenciales</h2>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                Tus credenciales se guardan localmente en tu navegador de forma 100% segura.
+              </p>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.8rem' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '4px 10px',
+              borderRadius: '9999px',
+              background: isGithubConfigured ? 'rgba(46, 160, 67, 0.15)' : 'rgba(83, 100, 113, 0.15)',
+              color: isGithubConfigured ? 'var(--accent-github-hover)' : 'var(--text-muted)',
+              fontWeight: 600
+            }}>
+              {isGithubConfigured ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+              <span>GitHub</span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '4px 10px',
+              borderRadius: '9999px',
+              background: isGeminiConfigured ? 'rgba(46, 160, 67, 0.15)' : 'rgba(83, 100, 113, 0.15)',
+              color: isGeminiConfigured ? 'var(--accent-github-hover)' : 'var(--text-muted)',
+              fontWeight: 600
+            }}>
+              {isGeminiConfigured ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+              <span>Gemini AI</span>
+            </div>
           </div>
         </div>
 
