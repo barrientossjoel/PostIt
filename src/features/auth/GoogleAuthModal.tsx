@@ -119,9 +119,14 @@ export const GoogleAuthModal: React.FC<Props> = ({
               <div style={{ flex: 1 }}>
                 <h3 style={{ fontSize: '0.98rem', fontWeight: 700 }}>{user.name}</h3>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{user.email}</p>
-                <span className="badge badge-public" style={{ marginTop: '4px' }}>
-                  Autenticado con Google
-                </span>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '4px' }}>
+                  <span className="badge badge-public">
+                    Autenticado con Google
+                  </span>
+                  <span className="badge badge-private" style={{ color: 'var(--accent-github-hover)' }}>
+                    ✓ Tokens vinculados a la cuenta
+                  </span>
+                </div>
               </div>
             </div>
 

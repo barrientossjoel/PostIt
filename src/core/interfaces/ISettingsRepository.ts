@@ -1,6 +1,7 @@
 import type { AppSettings } from '../entities/Settings';
 
 export interface ISettingsRepository {
-  getSettings(): AppSettings;
-  saveSettings(settings: AppSettings): void;
+  getSettings(userId?: string): AppSettings;
+  saveSettings(settings: AppSettings, userId?: string): void;
 }
+

@@ -32,16 +32,26 @@ const DEFAULT_GOOGLE_USER: UserProfile = {
 
 export function App() {
   const [activeTab, setActiveTab] = useState<TabId>('explorer');
-  const [settings, setSettings] = useState<AppSettings>(() => container.settingsRepository.getSettings());
-  const [currentPost, setCurrentPost] = useState<Post | null>(null);
-  const [pendingCount, setPendingCount] = useState<number>(0);
-  const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
   // User Google Auth state
   const [user, setUser] = useState<UserProfile | null>(() => {
     const saved = localStorage.getItem('postit_user_session');
-    return saved ? JSON.parse(saved) : DEFAULT_GOOGLE_USER;
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return DEFAULT_GOOGLE_USER;
+      }
+    }
+    return DEFAULT_GOOGLE_USER;
   });
+
+  const [settings, setSettings] = useState<AppSettings>(() =>
+    container.settingsRepository.getSettings(user?.id)
+  );
+  const [currentPost, setCurrentPost] = useState<Post | null>(null);
+  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
@@ -50,11 +60,34 @@ export function App() {
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem('postit_user_session', JSON.stringify(user));
+      const userSettings = container.settingsRepository.getSettings(user.id);
+      const mergedSettings: AppSettings = {
+        ...userSettings,
+        githubToken: user.githubToken || userSettings.githubToken || settings.githubToken,
+        geminiApiKey: user.geminiApiKey || userSettings.geminiApiKey || settings.geminiApiKey,
+        publerApiKey: user.publerApiKey || userSettings.publerApiKey || settings.publerApiKey,
+        publerWorkspaceId: user.publerWorkspaceId || userSettings.publerWorkspaceId || settings.publerWorkspaceId,
+        aiTone: user.aiTone || userSettings.aiTone || settings.aiTone,
+        aiLanguage: user.aiLanguage || userSettings.aiLanguage || settings.aiLanguage,
+      };
+      setSettings(mergedSettings);
+      container.settingsRepository.saveSettings(mergedSettings, user.id);
+      localStorage.setItem(
+        'postit_user_session',
+        JSON.stringify({
+          ...user,
+          githubToken: mergedSettings.githubToken,
+          geminiApiKey: mergedSettings.geminiApiKey,
+          publerApiKey: mergedSettings.publerApiKey,
+          publerWorkspaceId: mergedSettings.publerWorkspaceId,
+          aiTone: mergedSettings.aiTone,
+          aiLanguage: mergedSettings.aiLanguage,
+        })
+      );
     } else {
       localStorage.removeItem('postit_user_session');
     }
-  }, [user]);
+  }, [user?.id]);
 
   const updatePendingCount = () => {
     const allPosts = container.postRepository.getAllPosts();
@@ -72,16 +105,36 @@ export function App() {
 
   const handleSettingsSaved = (newSettings: AppSettings) => {
     setSettings(newSettings);
-    container.settingsRepository.saveSettings(newSettings);
+    container.settingsRepository.saveSettings(newSettings, user?.id);
+    if (user) {
+      const updatedUser: UserProfile = {
+        ...user,
+        githubToken: newSettings.githubToken,
+        geminiApiKey: newSettings.geminiApiKey,
+        publerApiKey: newSettings.publerApiKey,
+        publerWorkspaceId: newSettings.publerWorkspaceId,
+        aiTone: newSettings.aiTone,
+        aiLanguage: newSettings.aiLanguage,
+      };
+      setUser(updatedUser);
+    }
   };
 
   const handleLoginWithGoogle = (email?: string, name?: string) => {
+    const activeSettings = container.settingsRepository.getSettings(user?.id);
+    const userId = `usr_google_${email ? email.replace(/[^a-zA-Z0-9]/g, '_') : 'default'}`;
     const newUser: UserProfile = {
-      id: `usr_google_${Date.now()}`,
-      email: email || 'usuario.google@gmail.com',
-      name: name || 'Usuario Google',
+      id: userId,
+      email: email || 'joel.barrientos@gmail.com',
+      name: name || 'Joel Barrientos',
       avatarUrl: 'https://github.com/barrientossjoel.png',
       provider: 'google',
+      githubToken: activeSettings.githubToken,
+      geminiApiKey: activeSettings.geminiApiKey,
+      publerApiKey: activeSettings.publerApiKey,
+      publerWorkspaceId: activeSettings.publerWorkspaceId,
+      aiTone: activeSettings.aiTone,
+      aiLanguage: activeSettings.aiLanguage,
       connectedAccounts: {
         x: true,
         linkedin: true,
@@ -89,6 +142,7 @@ export function App() {
       },
     };
     setUser(newUser);
+    container.settingsRepository.saveSettings(activeSettings, userId);
   };
 
   const handleLogout = () => {

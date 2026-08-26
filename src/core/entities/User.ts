@@ -7,10 +7,15 @@ export interface UserProfile {
   provider: 'google' | 'guest';
   githubToken?: string;
   geminiApiKey?: string;
+  publerApiKey?: string;
+  publerWorkspaceId?: string;
+  aiTone?: 'developer' | 'enthusiastic' | 'professional' | 'concise' | 'storytelling';
+  aiLanguage?: 'es' | 'en';
   connectedAccounts: {
     x: boolean;
     linkedin: boolean;
     facebook: boolean;
   };
 }
+
 

@@ -91,6 +91,26 @@ const INITIAL_SAMPLE_POSTS: Post[] = [
   },
 ];
 
+function obfuscateToken(val?: string): string {
+  if (!val) return '';
+  if (val.startsWith('enc_v1:')) return val;
+  try {
+    return 'enc_v1:' + btoa(encodeURIComponent(val));
+  } catch {
+    return val;
+  }
+}
+
+function deobfuscateToken(val?: string): string {
+  if (!val) return '';
+  if (!val.startsWith('enc_v1:')) return val;
+  try {
+    return decodeURIComponent(atob(val.slice(7)));
+  } catch {
+    return val;
+  }
+}
+
 export class LocalStorageRepository implements IPostRepository, ISettingsRepository {
   constructor() {
     this.seedInitialDataIfEmpty();
@@ -102,19 +122,38 @@ export class LocalStorageRepository implements IPostRepository, ISettingsReposit
     }
   }
 
-  getSettings(): AppSettings {
-    const raw = localStorage.getItem(KEYS.SETTINGS);
+  getSettings(userId?: string): AppSettings {
+    const key = userId ? `${KEYS.SETTINGS}_${userId}` : KEYS.SETTINGS;
+    const raw = localStorage.getItem(key) || localStorage.getItem(KEYS.SETTINGS);
     if (!raw) return defaultSettings;
     try {
-      return { ...defaultSettings, ...JSON.parse(raw) };
+      const parsed: AppSettings = JSON.parse(raw);
+      return {
+        ...defaultSettings,
+        ...parsed,
+        githubToken: deobfuscateToken(parsed.githubToken),
+        geminiApiKey: deobfuscateToken(parsed.geminiApiKey),
+        publerApiKey: deobfuscateToken(parsed.publerApiKey),
+      };
     } catch {
       return defaultSettings;
     }
   }
 
-  saveSettings(settings: AppSettings): void {
-    localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
+  saveSettings(settings: AppSettings, userId?: string): void {
+    const obfuscated: AppSettings = {
+      ...settings,
+      githubToken: obfuscateToken(settings.githubToken),
+      geminiApiKey: obfuscateToken(settings.geminiApiKey),
+      publerApiKey: obfuscateToken(settings.publerApiKey),
+    };
+    const jsonStr = JSON.stringify(obfuscated);
+    localStorage.setItem(KEYS.SETTINGS, jsonStr);
+    if (userId) {
+      localStorage.setItem(`${KEYS.SETTINGS}_${userId}`, jsonStr);
+    }
   }
+
 
   getAllPosts(): Post[] {
     const raw = localStorage.getItem(KEYS.POSTS);
