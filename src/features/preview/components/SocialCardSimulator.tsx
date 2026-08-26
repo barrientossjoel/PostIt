@@ -1,24 +1,26 @@
 import React, { useState } from 'react';
 import type { Post } from '../../../core/entities/Post';
-import { MessageSquare, Heart, Repeat, Share, Globe, ThumbsUp, MessageCircle, BarChart2, Bookmark } from 'lucide-react';
+import { MessageSquare, Heart, Repeat, Share, Globe, ThumbsUp, MessageCircle, BarChart2, Bookmark, Scissors } from 'lucide-react';
 
 interface Props {
   post: Post | null;
   content: string;
   hashtags: string[];
+  onSmartTrim?: () => void;
 }
 
-export const SocialCardSimulator: React.FC<Props> = ({ post, content, hashtags }) => {
+export const SocialCardSimulator: React.FC<Props> = ({ post, content, hashtags, onSmartTrim }) => {
   const [activePlatform, setActivePlatform] = useState<'x' | 'linkedin' | 'facebook'>('x');
 
   const fullText = hashtags.length > 0 ? `${content}\n\n${hashtags.join(' ')}` : content;
   const charCount = fullText.length;
   const xLimit = 280;
+  const isOverLimit = charCount > xLimit;
 
   return (
     <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', minWidth: 0 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>Simulador de Redes</h3>
+        <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>Simulador de Redes (Estilo Publer)</h3>
         <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-primary)', padding: '3px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
           {(['x', 'linkedin', 'facebook'] as const).map((p) => (
             <button
@@ -35,13 +37,26 @@ export const SocialCardSimulator: React.FC<Props> = ({ post, content, hashtags }
 
       {/* Character count bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-        <span>Límite de caracteres (X):</span>
-        <span style={{ color: charCount > xLimit ? 'var(--accent-red)' : 'var(--accent-github-hover)', fontWeight: 700 }}>
-          {charCount} / {xLimit}
-        </span>
+        <span>Límite de caracteres ({activePlatform.toUpperCase()}):</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {isOverLimit && onSmartTrim && (
+            <button
+              type="button"
+              className="btn btn-danger btn-sm"
+              style={{ padding: '1px 6px', fontSize: '0.72rem' }}
+              onClick={onSmartTrim}
+              title="Recortar texto automáticamente para cumplir el límite"
+            >
+              <Scissors size={12} /> Auto-recortar
+            </button>
+          )}
+          <span style={{ color: isOverLimit ? 'var(--accent-red)' : 'var(--accent-github-hover)', fontWeight: 700 }}>
+            {charCount} / {xLimit}
+          </span>
+        </div>
       </div>
 
-      {/* Simulated Social Card - Fused with official X typography */}
+      {/* Simulated Social Card */}
       <div
         style={{
           background: activePlatform === 'x' ? '#000000' : 'var(--bg-primary)',
