@@ -62,18 +62,13 @@ export function usePostPreview(
 
     setPublishing(true);
     try {
-      const hashtags = hashtagsStr
-        .split(' ')
-        .filter((h) => h.trim().length > 0)
-        .map((h) => (h.startsWith('#') ? h : `#${h}`));
-
       const postToPublish: Post = currentPost || {
         id: `post_${Date.now()}`,
         repoFullName: 'PostIt/manual',
         commits: [],
         title: 'Publicación Manual',
         content,
-        hashtags,
+        hashtags: [],
         status: 'draft',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -82,7 +77,7 @@ export function usePostPreview(
 
       const useCase = new PublishPostUseCase(container.postRepository);
       const result = await useCase.execute({
-        post: { ...postToPublish, content, hashtags },
+        post: { ...postToPublish, content, hashtags: [] },
         platformId,
         settings,
       });
@@ -99,9 +94,8 @@ export function usePostPreview(
     }
   };
 
-  const handleCopyClipboard = () => {
-    const fullText = hashtagsStr.trim() ? `${content}\n\n${hashtagsStr}` : content;
-    navigator.clipboard.writeText(fullText);
+  const handleCopyText = () => {
+    navigator.clipboard.writeText(content);
     showToast('¡Copiado al portapapeles!', 'success');
   };
 
@@ -114,6 +108,6 @@ export function usePostPreview(
     publishing,
     handleRefine,
     handlePublish,
-    handleCopyClipboard,
+    handleCopyText,
   };
 }

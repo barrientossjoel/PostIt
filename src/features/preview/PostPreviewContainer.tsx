@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Post } from '../../core/entities/Post';
 import type { AppSettings } from '../../core/entities/Settings';
 import { usePostPreview } from './hooks/usePostPreview';
@@ -6,265 +6,249 @@ import { SocialCardSimulator } from './components/SocialCardSimulator';
 import { SocialSharePanel } from './SocialSharePanel';
 import { freeTranslationAdapter } from '../../infrastructure/adapters/FreeTranslationAdapter';
 import { container } from '../../infrastructure/container';
-import { Copy, Send, Wand2, FileText, Share2, Globe2, Scissors, RotateCcw, XCircle } from 'lucide-react';
+import { AccountsSidebar } from './components/AccountsSidebar';
+import { AddSocialAccountModal } from './components/AddSocialAccountModal';
+import { EditorToolbar } from './components/EditorToolbar';
+import type { SocialAccount } from './types/SocialAccount';
+import {
+  Copy,
+  Send,
+  FileText,
+  Share2,
+  RotateCcw,
+  Save,
+  UserCheck,
+  PlusCircle,
+  Tag,
+} from 'lucide-react';
+
+import type { UserProfile } from '../../core/entities/User';
 
 interface Props {
   currentPost: Post | null;
   settings: AppSettings;
+  user?: UserProfile | null;
   onPostUpdated: (post: Post) => void;
   onNavigateToPending?: () => void;
   showToast: (msg: string, type?: 'success' | 'error') => void;
 }
 
+const STORAGE_KEY = 'postit_social_accounts';
+
 export const PostPreviewContainer: React.FC<Props> = ({
   currentPost,
   settings,
+  user,
   onPostUpdated,
   onNavigateToPending,
   showToast,
 }) => {
   const preview = usePostPreview(currentPost, settings, onPostUpdated, showToast);
   const [isSharePanelOpen, setIsSharePanelOpen] = useState(false);
+  const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
   const [translating, setTranslating] = useState(false);
+  const [showFirstComment, setShowFirstComment] = useState(false);
+  const [firstCommentText, setFirstCommentText] = useState('');
 
-  const hashtagsArray = preview.hashtagsStr
-    .split(' ')
-    .filter((h) => h.trim().length > 0)
-    .map((h) => (h.startsWith('#') ? h : `#${h}`));
+  // Persisted Social Accounts
+  const [accounts, setAccounts] = useState<SocialAccount[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
-  const fullText = hashtagsArray.length > 0 ? `${preview.content}\n\n${hashtagsArray.join(' ')}` : preview.content;
-  const isOverLimit = fullText.length > 280;
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
+  }, [accounts]);
 
-  // Zero-AI Free Translation to Spanish
-  const handleFreeTranslateToSpanish = async () => {
+  // Initial account hydration from GitHub token if empty
+  useEffect(() => {
+    if (accounts.length === 0 && settings.githubToken) {
+      let active = true;
+      container.githubService.verifyToken(settings.githubToken).then((res) => {
+        if (active) {
+          setAccounts([
+            {
+              id: `acc_github_${Date.now()}`,
+              name: res.username,
+              handle: res.username,
+              platform: 'linkedin',
+              avatarUrl: res.avatarUrl || `https://unavatar.io/github/${res.username}`,
+              selected: true,
+            },
+          ]);
+        }
+      }).catch(() => {});
+      return () => { active = false; };
+    }
+  }, [settings.githubToken, accounts.length]);
+
+  const activeAccount = accounts.find((a) => a.selected) || accounts[0];
+
+  const handleToggleAccount = (id: string) => {
+    setAccounts((prev) =>
+      prev.map((acc) => (acc.id === id ? { ...acc, selected: !acc.selected } : acc))
+    );
+  };
+
+  const handleAddAccount = (accData: Omit<SocialAccount, 'id' | 'selected'>) => {
+    const newAcc: SocialAccount = {
+      ...accData,
+      id: `acc_${accData.platform}_${Date.now()}`,
+      selected: true,
+    };
+    setAccounts((prev) => [...prev, newAcc]);
+    showToast(`Cuenta conectada: ${newAcc.name} (${newAcc.platform.toUpperCase()})`, 'success');
+  };
+
+  const handleSmartTrim = () => {
+    let trimmed = preview.content.slice(0, 275);
+    const lastSpace = trimmed.lastIndexOf(' ');
+    if (lastSpace > 30) trimmed = trimmed.slice(0, lastSpace);
+    preview.setContent(`${trimmed.trim()}...`);
+    showToast('Post recortado a 280 caracteres', 'success');
+  };
+
+  const handleFreeTranslate = async () => {
     if (!preview.content) return;
     setTranslating(true);
     try {
-      const translated = await freeTranslationAdapter.translateToSpanish(preview.content);
-      preview.setContent(translated);
-      showToast('Texto traducido al español (Gratis sin IA)', 'success');
+      const res = await freeTranslationAdapter.translateToSpanish(preview.content);
+      preview.setContent(res);
+      showToast('Texto traducido al español', 'success');
     } catch {
-      showToast('No se pudo traducir automáticamente', 'error');
+      showToast('Error al traducir', 'error');
     } finally {
       setTranslating(false);
     }
   };
 
-  // Smart Trim to 280 Characters
-  const handleSmartTrim = () => {
-    const hashtagsLength = hashtagsArray.join(' ').length + (hashtagsArray.length > 0 ? 2 : 0);
-    const maxContentLen = Math.max(50, 275 - hashtagsLength);
-
-    let trimmed = preview.content.slice(0, maxContentLen);
-    const lastSpace = trimmed.lastIndexOf(' ');
-    if (lastSpace > 30) {
-      trimmed = trimmed.slice(0, lastSpace);
-    }
-    trimmed = `${trimmed.trim()}...`;
-    preview.setContent(trimmed);
-    showToast('Post recortado inteligentemente a 280 caracteres', 'success');
+  const handleSaveDraft = async () => {
+    if (!currentPost) return;
+    const draft: Post = { ...currentPost, content: preview.content, status: 'draft', updatedAt: new Date().toISOString() };
+    await container.postRepository.savePost(draft);
+    onPostUpdated(draft);
+    showToast('Borrador guardado localmente', 'success');
   };
 
-  // Cancel and Return to Pending Queue
-  const handleCancelAndReturnToPending = async () => {
+  const handleReturnToPending = async () => {
     if (!currentPost) return;
-    try {
-      const updatedPost: Post = {
-        ...currentPost,
-        content: preview.content,
-        hashtags: hashtagsArray,
-        status: 'pending',
-      };
-      await container.postRepository.savePost(updatedPost);
-      onPostUpdated(updatedPost);
-      showToast('Publicación cancelada y devuelta a Pendientes', 'success');
-      if (onNavigateToPending) {
-        onNavigateToPending();
-      }
-    } catch (err: any) {
-      showToast(err.message, 'error');
-    }
+    const pending: Post = { ...currentPost, content: preview.content, hashtags: [], status: 'pending' };
+    await container.postRepository.savePost(pending);
+    onPostUpdated(pending);
+    showToast('Devuelto a Pendientes', 'success');
+    onNavigateToPending?.();
   };
 
   return (
-    <div className="grid-split animate-fade-in">
-      {/* Left Column: Editor & AI Controls */}
-      <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
-          <div>
-            <h2 style={{ fontSize: '1.05rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileText size={18} color="var(--accent-blue)" /> Editor de Posteo
-            </h2>
-            {currentPost && (
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                Basado en {currentPost.commits.length} commit(s) de {currentPost.repoFullName}
-              </span>
-            )}
-          </div>
+    <div className="publer-3col-layout animate-fade-in">
+      {/* Columna 1: Cuentas */}
+      <AccountsSidebar
+        accounts={accounts}
+        onToggleAccount={handleToggleAccount}
+        onOpenAddModal={() => setIsAddAccountOpen(true)}
+      />
 
+      {/* Columna 2: Editor */}
+      <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-secondary)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {activeAccount && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-tertiary)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid var(--border-color)', fontSize: '0.8rem', fontWeight: 600, color: '#00e5ff' }}>
+                <UserCheck size={14} color="#00e5ff" />
+                <span>@{activeAccount.handle || activeAccount.name}</span>
+              </div>
+            )}
+            {currentPost && <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>• {currentPost.commits.length} commit(s) de {currentPost.repoFullName}</span>}
+          </div>
           {currentPost && (
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={handleCancelAndReturnToPending}
-              style={{ color: 'var(--accent-orange)' }}
-              title="Cancelar borrador y devolver a la cola de pendientes"
-            >
-              <RotateCcw size={14} /> Cancelar p/ Pendientes
+            <button className="btn btn-secondary btn-sm" onClick={handleReturnToPending} style={{ color: 'var(--accent-orange)', padding: '3px 8px', fontSize: '0.76rem' }}>
+              <RotateCcw size={13} /> Devolver a Pendientes
             </button>
           )}
         </div>
 
-        {/* Text Area */}
-        <div className="input-group">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <label className="input-label">Contenido del Post</label>
-
-            {/* Zero-AI Free Spanish Translation button */}
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={handleFreeTranslateToSpanish}
-              disabled={translating}
-              style={{ padding: '2px 7px', fontSize: '0.75rem', color: 'var(--accent-blue)' }}
-            >
-              <Globe2 size={13} /> {translating ? 'Traduciendo...' : '🌐 Traducir a Español (Gratis)'}
-            </button>
-          </div>
-          <textarea
-            className="textarea-input"
-            rows={6}
-            placeholder="Escribe o genera tu publicación..."
-            value={preview.content}
-            onChange={(e) => preview.setContent(e.target.value)}
-          />
-        </div>
-
-        {/* Hashtags Input */}
-        <div className="input-group">
-          <label className="input-label">Hashtags (separados por espacio)</label>
-          <input
-            type="text"
-            className="input-text"
-            placeholder="#BuildInPublic #DevUpdate #React"
-            value={preview.hashtagsStr}
-            onChange={(e) => preview.setHashtagsStr(e.target.value)}
-          />
-        </div>
-
-        {/* Character Limit Warning & 1-Click Trim Action */}
-        {isOverLimit && (
-          <div
-            style={{
-              padding: '0.65rem 0.85rem',
-              background: 'rgba(248, 81, 73, 0.12)',
-              border: '1px solid rgba(248, 81, 73, 0.3)',
-              borderRadius: 'var(--radius-sm)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '0.5rem',
-            }}
-          >
-            <span style={{ fontSize: '0.8rem', color: 'var(--accent-red)', fontWeight: 600 }}>
-              ⚠️ Excede el límite de X ({fullText.length} / 280)
+            <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <FileText size={14} color="var(--accent-blue)" /> Texto de la Publicación
+            </label>
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              <Tag size={12} style={{ display: 'inline', marginRight: 3 }} /> Editor Publer
             </span>
-            <button className="btn btn-danger btn-sm" onClick={handleSmartTrim}>
-              <Scissors size={14} /> Recortar a 280 chars
-            </button>
           </div>
-        )}
 
-        {/* AI Quick Refinements Bar */}
-        <div style={{ background: 'var(--bg-primary)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-          <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--accent-purple)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '0.5rem' }}>
-            <Wand2 size={14} /> Refinar con IA (Gemini):
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => preview.handleRefine('Hazlo más corto y conciso (máximo 250 caracteres)')}
-              disabled={preview.refining}
-            >
-              ⚡ Más corto
-            </button>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => preview.handleRefine('Añade un tono más entusiasta con emojis dev')}
-              disabled={preview.refining}
-            >
-              🚀 Emojis Dev
-            </button>
+          {/* Publer Textarea Container con fondo transparente */}
+          <div className="publer-textarea-container">
+            <textarea
+              className="publer-textarea-input"
+              rows={9}
+              placeholder="Escribe el texto de tu publicación o usa el asistente IA para refinar tus commits..."
+              value={preview.content}
+              onChange={(e) => preview.setContent(e.target.value)}
+            />
 
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => preview.handleRefine('Traduce el post a Inglés nativo dev')}
-              disabled={preview.refining}
-            >
-              🇺🇸 Inglés
-            </button>
+            {/* Toolbar con Bold, Italic, Emoji Picker, Attach Image, Signature y Traducir (con 1 solo icono) */}
+            <EditorToolbar
+              content={preview.content}
+              onChangeContent={(newVal) => preview.setContent(newVal)}
+              onTranslate={handleFreeTranslate}
+              translating={translating}
+              onRefine={() => preview.handleRefine('Redacta un post atractivo para devs')}
+              refining={preview.refining}
+              showToast={showToast}
+            />
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: 'auto', paddingTop: '0.5rem' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {/* Embedded Social Share Suite */}
-            <button
-              className="btn btn-x-black"
-              onClick={() => setIsSharePanelOpen(true)}
-              style={{ flex: '1 1 180px', justifyContent: 'center' }}
-            >
-              <Share2 size={15} /> Publicar Embedido en Redes (Publer)
-            </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <button type="button" onClick={() => setShowFirstComment(!showFirstComment)} style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', padding: 0 }}>
+            <PlusCircle size={14} /> {showFirstComment ? 'Ocultar primer comentario' : '+ Añadir primer comentario'}
+          </button>
+          {showFirstComment && (
+            <textarea className="textarea-input" rows={2} placeholder="Primer comentario automático..." style={{ fontSize: '0.82rem' }} value={firstCommentText} onChange={(e) => setFirstCommentText(e.target.value)} />
+          )}
+        </div>
 
-            {/* Publer Direct API Publish */}
-            <button
-              className="btn btn-primary"
-              onClick={() => preview.handlePublish('publer')}
-              disabled={preview.publishing || !settings.publerApiKey}
-              style={{ flex: '1 1 180px', justifyContent: 'center' }}
-              title={!settings.publerApiKey ? 'Configura tu API Key de Publer en Ajustes' : ''}
-            >
-              <Send size={15} /> Enviar Vía API Publer
-            </button>
-          </div>
-
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.85rem', marginTop: 'auto', gap: '0.65rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn btn-secondary" onClick={preview.handleCopyClipboard} style={{ flex: 1, justifyContent: 'center' }}>
-              <Copy size={15} /> Copiar al Portapapeles
-            </button>
-
-            {currentPost && (
-              <button
-                className="btn btn-danger btn-sm"
-                onClick={handleCancelAndReturnToPending}
-                title="Cancelar y Devolver a Pendientes"
-              >
-                <XCircle size={15} /> Cancelar
-              </button>
-            )}
+            <button type="button" className="btn btn-secondary btn-sm" onClick={handleSaveDraft}><Save size={14} /> Guardar Borrador</button>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={preview.handleCopyText}><Copy size={13} /> Copiar Texto</button>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button type="button" className="btn btn-x-black btn-sm" onClick={() => setIsSharePanelOpen(true)}><Share2 size={14} /> Publicar Directo</button>
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => preview.handlePublish('publer')} disabled={preview.publishing || !settings.publerApiKey}><Send size={14} /> Enviar API Publer</button>
           </div>
         </div>
       </div>
 
-      {/* Right Column: Live Social Card Simulator */}
+      {/* Columna 3: Preview Live */}
       <SocialCardSimulator
         post={currentPost}
         content={preview.content}
-        hashtags={hashtagsArray}
+        githubUser={activeAccount ? activeAccount.name : ''}
+        githubAvatar={activeAccount ? activeAccount.avatarUrl : undefined}
         onSmartTrim={handleSmartTrim}
       />
 
-      {/* Embedded Social Share Suite Drawer Modal */}
-      {currentPost && (
+      {/* Modal Reutilizable de Cuentas */}
+      <AddSocialAccountModal
+        isOpen={isAddAccountOpen}
+        onClose={() => setIsAddAccountOpen(false)}
+        onAddAccount={handleAddAccount}
+        user={user}
+      />
+
+      {/* Share Modal */}
+      {isSharePanelOpen && (
         <SocialSharePanel
-          post={{ ...currentPost, content: preview.content, hashtags: hashtagsArray }}
+          post={currentPost || { id: 'temp', repoFullName: 'PostIt/manual', commits: [], title: 'Manual', content: preview.content, hashtags: [], status: 'draft', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), aiTone: settings.aiTone }}
           isOpen={isSharePanelOpen}
           onClose={() => setIsSharePanelOpen(false)}
-          onConfirmPublished={() => {
-            setIsSharePanelOpen(false);
-            showToast('Post marcado como publicado', 'success');
-          }}
+          onConfirmPublished={() => showToast('Publicado con éxito', 'success')}
           showToast={showToast}
         />
       )}

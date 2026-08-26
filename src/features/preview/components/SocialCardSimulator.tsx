@@ -1,42 +1,149 @@
 import React, { useState } from 'react';
 import type { Post } from '../../../core/entities/Post';
-import { MessageSquare, Heart, Repeat, Share, Globe, ThumbsUp, MessageCircle, BarChart2, Bookmark, Scissors } from 'lucide-react';
+import {
+  MessageSquare,
+  Heart,
+  Repeat,
+  Share,
+  Globe,
+  ThumbsUp,
+  MessageCircle,
+  BarChart2,
+  Bookmark,
+  Scissors,
+  Monitor,
+  Smartphone,
+  MoreHorizontal,
+  Send,
+  Info,
+} from 'lucide-react';
 
 interface Props {
   post: Post | null;
   content: string;
-  hashtags: string[];
+  hashtags?: string[];
+  githubUser?: string;
+  githubAvatar?: string;
   onSmartTrim?: () => void;
 }
 
-export const SocialCardSimulator: React.FC<Props> = ({ post, content, hashtags, onSmartTrim }) => {
-  const [activePlatform, setActivePlatform] = useState<'x' | 'linkedin' | 'facebook'>('x');
+export const SocialCardSimulator: React.FC<Props> = ({
+  post,
+  content,
+  githubUser = '',
+  githubAvatar,
+  onSmartTrim,
+}) => {
+  const [activePlatform, setActivePlatform] = useState<'linkedin' | 'x' | 'facebook'>('linkedin');
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
 
-  const fullText = hashtags.length > 0 ? `${content}\n\n${hashtags.join(' ')}` : content;
-  const charCount = fullText.length;
-  const xLimit = 280;
-  const isOverLimit = charCount > xLimit;
+  const charCount = content.length;
+  const platformLimits: Record<'linkedin' | 'x' | 'facebook', number> = {
+    x: 280,
+    linkedin: 3000,
+    facebook: 5000,
+  };
+  const limit = platformLimits[activePlatform];
+  const isOverLimit = charCount > limit;
+
+  const displayName = githubUser.trim() || 'Cuenta Conectada';
+  const handleName = githubUser.trim() ? `@${githubUser.toLowerCase().replace(/\s+/g, '')}` : '@cuenta';
 
   return (
-    <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', minWidth: 0 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>Simulador de Redes (Estilo Publer)</h3>
-        <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-primary)', padding: '3px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
-          {(['x', 'linkedin', 'facebook'] as const).map((p) => (
+    <div
+      className="github-card"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.85rem',
+        width: '100%',
+        minWidth: 0,
+        background: 'var(--bg-secondary)',
+      }}
+    >
+      {/* Header: Post Preview ℹ️ + Controls */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          borderBottom: '1px solid var(--border-color)',
+          paddingBottom: '0.65rem',
+          flexWrap: 'wrap',
+          gap: '0.5rem',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <h3 style={{ fontSize: '0.92rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
+            Post Preview
+          </h3>
+          <span title="Vista previa en tiempo real adaptada a la red social" style={{ display: 'inline-flex', cursor: 'help', color: 'var(--text-muted)' }}>
+            <Info size={14} />
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Platform Selector Dropdown / Tabs */}
+          <select
+            className="select-input"
+            value={activePlatform}
+            onChange={(e) => setActivePlatform(e.target.value as any)}
+            style={{
+              padding: '3px 8px',
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              background: 'var(--bg-tertiary)',
+              borderRadius: 'var(--radius-sm)',
+            }}
+          >
+            <option value="linkedin">💼 LinkedIn</option>
+            <option value="x">𝕏 / Twitter</option>
+            <option value="facebook">📘 Facebook</option>
+          </select>
+
+          {/* View Mode Switcher (Desktop / Mobile) */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '2px',
+              background: 'var(--bg-primary)',
+              padding: '2px',
+              borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)',
+            }}
+          >
             <button
-              key={p}
-              className={`btn btn-sm ${activePlatform === p ? 'btn-primary' : 'btn-secondary'}`}
-              style={{ textTransform: 'capitalize', fontSize: '0.75rem', padding: '3px 8px' }}
-              onClick={() => setActivePlatform(p)}
+              type="button"
+              className={`btn btn-sm ${viewMode === 'desktop' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '3px 6px' }}
+              onClick={() => setViewMode('desktop')}
+              title="Vista de Escritorio"
             >
-              {p === 'x' ? 'X / Twitter' : p === 'linkedin' ? 'LinkedIn' : 'Facebook'}
+              <Monitor size={13} />
             </button>
-          ))}
+            <button
+              type="button"
+              className={`btn btn-sm ${viewMode === 'mobile' ? 'btn-primary' : 'btn-secondary'}`}
+              style={{ padding: '3px 6px' }}
+              onClick={() => setViewMode('mobile')}
+              title="Vista Móvil"
+            >
+              <Smartphone size={13} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Character count bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+      {/* Character Count Bar */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '0.76rem',
+          color: 'var(--text-muted)',
+        }}
+      >
         <span>Límite de caracteres ({activePlatform.toUpperCase()}):</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {isOverLimit && onSmartTrim && (
@@ -45,120 +152,210 @@ export const SocialCardSimulator: React.FC<Props> = ({ post, content, hashtags, 
               className="btn btn-danger btn-sm"
               style={{ padding: '1px 6px', fontSize: '0.72rem' }}
               onClick={onSmartTrim}
-              title="Recortar texto automáticamente para cumplir el límite"
+              title="Recortar texto automáticamente para cumplir el límite de 280 caracteres"
             >
               <Scissors size={12} /> Auto-recortar
             </button>
           )}
-          <span style={{ color: isOverLimit ? 'var(--accent-red)' : 'var(--accent-github-hover)', fontWeight: 700 }}>
-            {charCount} / {xLimit}
+          <span
+            style={{
+              color: isOverLimit ? 'var(--accent-red)' : 'var(--accent-github-hover)',
+              fontWeight: 700,
+            }}
+          >
+            {charCount} / {limit}
           </span>
         </div>
       </div>
 
-      {/* Simulated Social Card */}
+      {/* Container Wrapper with Mobile vs Desktop constraint */}
       <div
         style={{
-          background: activePlatform === 'x' ? '#000000' : 'var(--bg-primary)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '16px',
-          padding: '1rem 1.25rem',
-          color: '#e7e9ea',
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
           width: '100%',
-          boxSizing: 'border-box',
+          display: 'flex',
+          justifyContent: 'center',
+          transition: 'all 0.2s ease',
         }}
       >
-        {/* User Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '0.75rem' }}>
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #1d9bf0, #8b5cf6)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              color: '#ffffff',
-              fontSize: '0.95rem',
-              flexShrink: 0,
-            }}
-          >
-            P
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f7f9f9', display: 'flex', alignItems: 'center', gap: '4px', lineHeight: '1.2' }}>
-              PostIt Dev <span style={{ fontSize: '0.75rem', color: '#1d9bf0' }}>✔</span>
-            </div>
-            <div style={{ fontSize: '0.82rem', color: '#71767b', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-              @dev_builder • ahora {activePlatform === 'linkedin' && <Globe size={12} />}
-            </div>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div style={{ fontSize: '0.95rem', lineHeight: '1.5', whiteSpace: 'pre-wrap', marginBottom: '0.85rem', color: '#e7e9ea', fontWeight: 400 }}>
-          {content || 'Escribe tu borrador para previsualizar aquí...'}
-          {hashtags.length > 0 && (
-            <div style={{ color: '#1d9bf0', marginTop: '0.5rem', fontWeight: 500 }}>
-              {hashtags.join(' ')}
-            </div>
-          )}
-        </div>
-
-        {/* Repository Tag Card */}
-        {post?.repoFullName && (
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '12px',
-              padding: '0.65rem 0.85rem',
-              marginBottom: '0.85rem',
-              fontSize: '0.82rem',
-              color: '#71767b',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <span style={{ color: '#e7e9ea', fontWeight: 500 }}>📦 Repositorio: {post.repoFullName}</span>
-            <span style={{ color: '#1d9bf0' }}>github.com</span>
-          </div>
-        )}
-
-        {/* Social Actions Simulation */}
         <div
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-            paddingTop: '0.75rem',
-            color: '#71767b',
-            fontSize: '0.82rem',
+            width: viewMode === 'mobile' ? '100%' : '100%',
+            maxWidth: viewMode === 'mobile' ? '360px' : '100%',
+            background: activePlatform === 'x' ? '#000000' : 'var(--bg-primary)',
+            border: '1px solid var(--border-color)',
+            borderRadius: viewMode === 'mobile' ? '20px' : '12px',
+            padding: viewMode === 'mobile' ? '1rem' : '1.1rem',
+            color: '#e7e9ea',
+            fontFamily:
+              "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+            boxSizing: 'border-box',
+            boxShadow: viewMode === 'mobile' ? '0 8px 24px rgba(0,0,0,0.4)' : 'none',
           }}
         >
-          {activePlatform === 'x' ? (
-            <>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}><MessageSquare size={16} /> 12</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}><Repeat size={16} /> 8</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}><Heart size={16} /> 45</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}><BarChart2 size={16} /> 63 mil</span>
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <Bookmark size={16} style={{ cursor: 'pointer' }} />
-                <Share size={16} style={{ cursor: 'pointer' }} />
+          {/* User Header */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '0.75rem' }}>
+            {githubAvatar ? (
+              <img
+                src={githubAvatar}
+                alt={displayName}
+                style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover' }}
+              />
+            ) : (
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: '50%',
+                  background:
+                    activePlatform === 'linkedin'
+                      ? '#0a66c2'
+                      : activePlatform === 'facebook'
+                      ? '#1877f2'
+                      : 'linear-gradient(135deg, #1d9bf0, #8b5cf6)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 800,
+                  color: '#ffffff',
+                  fontSize: '0.95rem',
+                  flexShrink: 0,
+                }}
+              >
+                {displayName.charAt(0).toUpperCase()}
               </div>
-            </>
-          ) : (
-            <>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}><ThumbsUp size={15} /> Me gusta</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}><MessageCircle size={15} /> Comentar</span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}><Repeat size={15} /> Repostear</span>
-            </>
+            )}
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div
+                style={{
+                  fontWeight: 700,
+                  fontSize: '0.92rem',
+                  color: '#f7f9f9',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  lineHeight: '1.2',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span>{displayName}</span>
+                  {activePlatform === 'x' && <span style={{ fontSize: '0.75rem', color: '#1d9bf0' }}>✔</span>}
+                </div>
+                <MoreHorizontal size={16} color="#71767b" style={{ cursor: 'pointer' }} />
+              </div>
+
+              <div
+                style={{
+                  fontSize: '0.78rem',
+                  color: '#71767b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  marginTop: '2px',
+                }}
+              >
+                <span>{activePlatform === 'x' ? handleName : 'Software Engineer & Builder'}</span>
+                <span>•</span>
+                <span>ahora</span>
+                <span>•</span>
+                <Globe size={11} color="#71767b" />
+              </div>
+            </div>
+          </div>
+
+          {/* Main Body Content */}
+          <div
+            style={{
+              fontSize: '0.92rem',
+              lineHeight: '1.5',
+              whiteSpace: 'pre-wrap',
+              marginBottom: '0.85rem',
+              color: '#e7e9ea',
+              fontWeight: 400,
+              wordBreak: 'break-word',
+            }}
+          >
+            {content || 'Escribe o genera el contenido de tu publicación para previsualizar aquí...'}
+          </div>
+
+          {/* Embedded Repository Snippet Card */}
+          {post?.repoFullName && (
+            <div
+              style={{
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '10px',
+                padding: '0.6rem 0.8rem',
+                marginBottom: '0.85rem',
+                fontSize: '0.8rem',
+                color: '#71767b',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <span style={{ color: '#e7e9ea', fontWeight: 600 }}>📦 Repositorio: {post.repoFullName}</span>
+              <span style={{ color: '#1d9bf0', fontSize: '0.75rem' }}>github.com</span>
+            </div>
           )}
+
+          {/* Social Platform Actions */}
+          <div
+            style={{
+              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              paddingTop: '0.65rem',
+              color: '#71767b',
+              fontSize: '0.8rem',
+            }}
+          >
+            {activePlatform === 'linkedin' ? (
+              <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                  <ThumbsUp size={15} /> Me gusta
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                  <MessageCircle size={15} /> Comentar
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                  <Repeat size={15} /> Repostear
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                  <Send size={15} /> Enviar
+                </span>
+              </div>
+            ) : activePlatform === 'x' ? (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                  <MessageSquare size={15} /> Responder
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                  <Repeat size={15} /> Repostear
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                  <Heart size={15} /> Me gusta
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                  <BarChart2 size={15} /> Vistas
+                </span>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <Bookmark size={15} style={{ cursor: 'pointer' }} />
+                  <Share size={15} style={{ cursor: 'pointer' }} />
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                  <ThumbsUp size={15} /> Me gusta
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                  <MessageCircle size={15} /> Comentar
+                </span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                  <Share size={15} /> Compartir
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
