@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import type { Post } from '../../core/entities/Post';
 import { usePendingQueue } from './hooks/usePendingQueue';
 import { Inbox, Trash2, Edit3, GitCommit, Clock, ArrowRight } from 'lucide-react';
+import { MasonryGrid } from '../shared/components/MasonryGrid';
 
 interface Props {
   onSelectForPreview: (post: Post) => void;
@@ -15,47 +16,7 @@ interface ResizableCardProps {
 }
 
 const ResizablePendingCard: React.FC<ResizableCardProps> = ({ post, queue }) => {
-  const [dimensions, setDimensions] = useState<{ width?: number; height?: number }>({});
-  const isResizing = useRef(false);
-  const startPos = useRef({ x: 0, y: 0, w: 0, h: 0 });
-  const cardRef = useRef<HTMLDivElement>(null);
-
   const isSelected = queue.selectedPostIds.includes(post.id);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!cardRef.current) return;
-
-    isResizing.current = true;
-    const rect = cardRef.current.getBoundingClientRect();
-    startPos.current = {
-      x: e.clientX,
-      y: e.clientY,
-      w: rect.width,
-      h: rect.height,
-    };
-
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      if (!isResizing.current) return;
-      const deltaX = moveEvent.clientX - startPos.current.x;
-      const deltaY = moveEvent.clientY - startPos.current.y;
-
-      const newWidth = Math.max(280, startPos.current.w + deltaX);
-      const newHeight = Math.max(170, startPos.current.h + deltaY);
-
-      setDimensions({ width: newWidth, height: newHeight });
-    };
-
-    const handleMouseUp = () => {
-      isResizing.current = false;
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-  };
 
   const formattedTime = new Date(post.createdAt).toLocaleTimeString([], {
     hour: '2-digit',
@@ -64,23 +25,21 @@ const ResizablePendingCard: React.FC<ResizableCardProps> = ({ post, queue }) => 
 
   return (
     <div
-      ref={cardRef}
+      className="github-card"
       style={{
         display: 'flex',
         flexDirection: 'column',
         gap: '0.9rem',
-        background: '#13161c',
-        border: isSelected ? '1.5px solid var(--accent-cyan)' : '1px solid #232730',
-        borderRadius: '16px',
-        padding: '1.25rem',
+        border: isSelected ? '1.5px solid var(--accent-cyan)' : undefined,
         position: 'relative',
-        width: dimensions.width ? `${dimensions.width}px` : '100%',
-        maxWidth: '100%',
-        boxSizing: 'border-box',
+        width: '100%',
+        height: '100%',
         minHeight: '220px',
-        height: dimensions.height ? `${dimensions.height}px` : 'auto',
-        transition: isResizing.current ? 'none' : 'border 0.2s ease, box-shadow 0.2s ease',
+        boxSizing: 'border-box',
+        transition: 'border 0.2s ease, box-shadow 0.2s ease',
         boxShadow: isSelected ? '0 4px 20px rgba(0, 229, 255, 0.15)' : 'none',
+        resize: 'both',
+        overflow: 'hidden',
       }}
     >
       {/* Top Header Row: Checkbox + Repo Pill + Timestamp */}
@@ -138,8 +97,6 @@ const ResizablePendingCard: React.FC<ResizableCardProps> = ({ post, queue }) => 
           wordBreak: 'break-word',
           color: '#d1d5db',
           flex: 1,
-          overflowY: 'auto',
-          maxHeight: '180px',
           fontFamily: post.content.includes('```') ? 'Consolas, Monaco, monospace' : 'inherit',
         }}
       >
@@ -224,17 +181,6 @@ const ResizablePendingCard: React.FC<ResizableCardProps> = ({ post, queue }) => 
         </button>
       </div>
 
-      {/* Inverted L Icon Resize Handle */}
-      <div
-        className="resize-handle-inverted-l"
-        onMouseDown={handleMouseDown}
-        title="Arrastrar para redimensionar"
-      >
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2v10H2" />
-          <path d="M12 6v6H6" strokeWidth="1.5" opacity="0.6" />
-        </svg>
-      </div>
     </div>
   );
 };
@@ -277,24 +223,16 @@ export const PendingQueueContainer: React.FC<Props> = ({
         </button>
       </div>
 
-      {/* Non-overlapping Responsive CSS Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-          gap: '1.25rem',
-          alignItems: 'start',
-          width: '100%',
-        }}
-      >
+      <MasonryGrid columnWidth={280} gap={20}>
         {queue.pendingPosts.map((post) => (
           <ResizablePendingCard key={post.id} post={post} queue={queue} />
         ))}
-      </div>
+      </MasonryGrid>
 
       {/* Sticky Viewport-Anchored Floating Bar (zIndex: 9999) */}
       {queue.selectedPostIds.length > 0 && (
         <div
+          className="floating-action-bar"
           style={{
             position: 'fixed',
             bottom: '1.5rem',

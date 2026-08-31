@@ -96,47 +96,6 @@ export const RepoExplorerContainer: React.FC<Props> = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem', width: '100%' }}>
-      {/* GitHub Breadcrumb Header */}
-      <div
-        className="github-card"
-        style={{
-          padding: '0.65rem 1rem',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '0.88rem',
-          fontWeight: 600,
-          background: 'var(--bg-secondary)',
-        }}
-      >
-        <button
-          onClick={() => explorer.setMobileStep('repos')}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--accent-blue)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            font: 'inherit',
-            fontWeight: 600,
-            padding: 0,
-          }}
-        >
-          <FolderGit2 size={16} /> Repositorios
-        </button>
-
-        {explorer.selectedRepo && (
-          <>
-            <ChevronRight size={14} color="var(--text-muted)" />
-            <span style={{ color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              {explorer.selectedRepo.isPrivate ? <Lock size={12} color="var(--accent-orange)" /> : <Globe size={12} color="var(--accent-github-hover)" />}
-              {explorer.selectedRepo.fullName}
-            </span>
-          </>
-        )}
-      </div>
 
       <div className="grid-split animate-fade-in">
         {/* Panel 1: Repositories List (Hidden on mobile if viewing commits) */}
@@ -516,6 +475,7 @@ export const RepoExplorerContainer: React.FC<Props> = ({
 
               {explorer.selectedCommitShas.length > 0 && (
                 <div
+                  className="floating-action-bar"
                   style={{
                     position: 'fixed',
                     bottom: '1.5rem',
