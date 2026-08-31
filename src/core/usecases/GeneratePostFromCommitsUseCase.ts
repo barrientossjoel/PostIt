@@ -42,7 +42,6 @@ export class GeneratePostFromCommitsUseCase {
       commits,
       title: aiOutput.title,
       content: aiOutput.content,
-      hashtags: aiOutput.hashtags,
       status: 'draft',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

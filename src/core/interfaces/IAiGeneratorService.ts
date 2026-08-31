@@ -19,7 +19,6 @@ export interface RefinePostOptions {
 export interface GeneratedPostOutput {
   title: string;
   content: string;
-  hashtags: string[];
 }
 
 export interface IAiGeneratorService {

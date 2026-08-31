@@ -54,7 +54,6 @@ export class ScanPendingCommitsUseCase {
             commits: commitsToProcess,
             title,
             content,
-            hashtags: ['#BuildInPublic', '#DevUpdate'],
             status: 'pending',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

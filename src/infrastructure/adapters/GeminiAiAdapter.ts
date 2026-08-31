@@ -24,8 +24,7 @@ REGLAS:
 - Estructura limpia y atrayente para la comunidad dev.
 - Responde estrictamente con un objeto JSON sin formato adicional con las siguientes claves:
   "title": Título corto y atractivo
-  "content": Texto completo del post (máximo 280 caracteres ideal para X/Twitter o extensible para LinkedIn)
-  "hashtags": Array de 3 a 5 hashtags sugeridos en formato string (ej: ["#BuildInPublic", "#WebDev"])`;
+  "content": Texto completo del post (máximo 280 caracteres ideal para X/Twitter o extensible para LinkedIn)`;
 
     const res = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -53,13 +52,11 @@ REGLAS:
       return {
         title: parsed.title || `Novedades en ${repoName}`,
         content: parsed.content || raw,
-        hashtags: Array.isArray(parsed.hashtags) ? parsed.hashtags : ['#BuildInPublic', '#DevUpdate'],
       };
     } catch {
       return {
         title: `Actualización de ${repoName}`,
         content: raw,
-        hashtags: ['#BuildInPublic', '#DevUpdate'],
       };
     }
   }

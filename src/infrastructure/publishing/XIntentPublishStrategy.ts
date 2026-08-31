@@ -7,9 +7,7 @@ export class XIntentPublishStrategy implements IPublishStrategy {
   readonly platformName = 'X (Twitter) Intent';
 
   async publish(post: Post, _settings: AppSettings): Promise<PublishResult> {
-    const fullContent = post.hashtags.length > 0
-      ? `${post.content}\n\n${post.hashtags.join(' ')}`
-      : post.content;
+    const fullContent = post.content;
 
     const params = new URLSearchParams();
     params.append('text', fullContent);

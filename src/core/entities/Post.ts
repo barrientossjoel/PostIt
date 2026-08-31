@@ -9,7 +9,6 @@ export interface Post {
   commits: Commit[];
   title: string;
   content: string;
-  hashtags: string[];
   status: PostStatus;
   createdAt: string;
   updatedAt: string;

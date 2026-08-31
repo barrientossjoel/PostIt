@@ -14,9 +14,7 @@ export class PublerPublishStrategy implements IPublishStrategy {
       };
     }
 
-    const fullContent = post.hashtags.length > 0
-      ? `${post.content}\n\n${post.hashtags.join(' ')}`
-      : post.content;
+    const fullContent = post.content;
 
     try {
       const headers: Record<string, string> = {
