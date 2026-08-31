@@ -8,7 +8,7 @@ interface Props {
 }
 
 const DEFAULT_SIGNATURES = [
-  { id: 'sig_1', name: 'Standard Dev Signature', text: '\n\n---\n🚀 Built with PostIt | #buildinpublic' },
+  { id: 'sig_1', name: 'Standard Dev Signature', text: '\n\n---\n🚀 Built with PostIt' },
   { id: 'sig_2', name: 'GitHub & Social Links', text: '\n\n---\n💻 GitHub: https://github.com\n✨ Follow for dev updates!' },
 ];
 
@@ -49,7 +49,7 @@ export const SignatureModal: React.FC<Props> = ({ isOpen, onClose, onApplySignat
 
         {/* Explanation Subtext */}
         <p className="signature-description">
-          Just like in emails, signatures are outros, i.e. text, hashtags, etc, that can be automatically appended to the end of your posts.
+          Just like in emails, signatures are outros, i.e. text, links, etc, that can be automatically appended to the end of your posts.
         </p>
 
         {/* Dropdown Selector */}

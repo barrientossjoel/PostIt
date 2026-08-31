@@ -199,7 +199,6 @@ export function useRepoExplorer(
       commits: selectedCommits,
       title: postTitle,
       content: contentText,
-      hashtags: ['#BuildInPublic', '#DevUpdate'],
       status: 'draft',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

@@ -181,7 +181,7 @@ export const PostPreviewContainer: React.FC<Props> = ({
       {/* Share Modal */}
       {isSharePanelOpen && (
         <SocialSharePanel
-          post={currentPost || { id: 'temp', repoFullName: 'PostIt/manual', commits: [], title: 'Manual', content: preview.content, hashtags: [], status: 'draft', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), aiTone: settings.aiTone }}
+          post={currentPost || { id: 'temp', repoFullName: 'PostIt/manual', commits: [], title: 'Manual', content: preview.content, status: 'draft', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), aiTone: settings.aiTone }}
           isOpen={isSharePanelOpen}
           onClose={() => setIsSharePanelOpen(false)}
           onConfirmPublished={() => showToast('Publicado con éxito', 'success')}

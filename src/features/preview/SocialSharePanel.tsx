@@ -23,7 +23,7 @@ export const SocialSharePanel: React.FC<Props> = ({
 
   if (!isOpen) return null;
 
-  const fullText = `${post.content}\n\n${post.hashtags.join(' ')}`;
+  const fullText = `${post.content}`;
 
   const handleSimulatedPublish = () => {
     setIsPublishing(true);

@@ -103,16 +103,6 @@ const ResizablePendingCard: React.FC<ResizableCardProps> = ({ post, queue }) => 
         {post.content}
       </div>
 
-      {/* Hashtags */}
-      {post.hashtags.length > 0 && (
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {post.hashtags.map((h, i) => (
-            <span key={i} style={{ fontSize: '0.82rem', color: '#1d9bf0', fontWeight: 600 }}>
-              {h.startsWith('#') ? h : `#${h}`}
-            </span>
-          ))}
-        </div>
-      )}
 
       {/* Commits Meta */}
       <div style={{ fontSize: '0.78rem', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '5px' }}>

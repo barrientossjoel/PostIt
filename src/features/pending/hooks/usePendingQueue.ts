@@ -62,7 +62,7 @@ export function usePendingQueue(
       const repoNames = Array.from(new Set(selectedPosts.map((p) => p.repoFullName)));
       const combinedTitle = `Actualización de ${repoNames.join(', ')}`;
       const combinedContent = selectedPosts.map((p) => p.content).join('\n\n---\n\n');
-      const combinedHashtags = Array.from(new Set(selectedPosts.flatMap((p) => p.hashtags)));
+
 
       combinedPost = {
         id: `post_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
@@ -70,7 +70,6 @@ export function usePendingQueue(
         commits: allCommits,
         title: combinedTitle,
         content: combinedContent,
-        hashtags: combinedHashtags.length > 0 ? combinedHashtags : ['#BuildInPublic', '#DevUpdate'],
         status: 'draft',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),

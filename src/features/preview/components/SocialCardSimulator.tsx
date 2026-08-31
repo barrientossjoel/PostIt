@@ -22,7 +22,7 @@ import {
 interface Props {
   post: Post | null;
   content: string;
-  hashtags?: string[];
+
   activeAccount?: SocialAccount;
   githubUser?: string;
   githubAvatar?: string;

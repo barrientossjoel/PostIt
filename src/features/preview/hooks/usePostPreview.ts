@@ -12,14 +12,13 @@ export function usePostPreview(
   showToast: (msg: string, type?: 'success' | 'error') => void
 ) {
   const [content, setContent] = useState('');
-  const [hashtagsStr, setHashtagsStr] = useState('');
+
   const [refining, setRefining] = useState(false);
   const [publishing, setPublishing] = useState(false);
 
   useEffect(() => {
     if (currentPost) {
       setContent(currentPost.content);
-      setHashtagsStr((currentPost.hashtags || []).join(' '));
     }
   }, [currentPost]);
 
@@ -68,7 +67,6 @@ export function usePostPreview(
         commits: [],
         title: 'Publicación Manual',
         content,
-        hashtags: [],
         status: 'draft',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -77,7 +75,7 @@ export function usePostPreview(
 
       const useCase = new PublishPostUseCase(container.postRepository);
       const result = await useCase.execute({
-        post: { ...postToPublish, content, hashtags: [] },
+        post: { ...postToPublish, content },
         platformId,
         settings,
       });
@@ -102,8 +100,6 @@ export function usePostPreview(
   return {
     content,
     setContent,
-    hashtagsStr,
-    setHashtagsStr,
     refining,
     publishing,
     handleRefine,
