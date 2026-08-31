@@ -80,7 +80,6 @@ export const SocialCardSimulator: React.FC<Props> = ({
         gap: '0.85rem',
         width: '100%',
         minWidth: 0,
-        background: 'var(--bg-secondary)',
       }}
     >
       {/* Header: Post Preview ℹ️ + Controls */}

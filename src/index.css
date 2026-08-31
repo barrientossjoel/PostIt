@@ -145,10 +145,10 @@ body {
 /* Div Containers & Cards: NO light borders, only dark seamless background */
 .github-card,
 .accounts-sidebar-card {
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color); /* Seamless dark border */
-  border-radius: var(--radius-lg);
-  padding: 1.1rem;
+  background-color: #13161c;
+  border: 1px solid #232730;
+  border-radius: 16px;
+  padding: 1.25rem;
   width: 100%;
 }
 
@@ -215,7 +215,7 @@ body {
   position: relative;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-input);
-  background: #0d0f12;
+  background: transparent;
   overflow: hidden;
   transition: border-color 0.15s ease;
 }
@@ -230,6 +230,7 @@ body {
   background: transparent !important;
   color: var(--text-primary);
   padding: 0.85rem;
+  font-family: inherit;
   font-size: 0.9rem;
   line-height: 1.55;
   outline: none;
@@ -238,6 +239,7 @@ body {
 
 .publer-textarea-input::placeholder {
   color: #8b949e;
+  font-family: inherit;
 }
 
 
@@ -303,7 +305,7 @@ body {
 .toolbar-btn-sq:hover { background: rgba(255, 255, 255, 0.08); }
 
 .btn-add-account {
-  width: 100%;
+  width: auto;
   padding: 6px 12px;
   background: transparent;
   border: 1px solid var(--border-input);
@@ -426,9 +428,79 @@ body {
 .btn-publer-cancel { padding: 0.5rem 1.25rem; background: transparent; border: 1px solid var(--border-input); border-radius: 6px; color: #e4e4e7; font-size: 0.88rem; cursor: pointer; }
 .btn-publer-save { padding: 0.5rem 1.5rem; background: #0d9488; border: none; border-radius: 6px; color: #ffffff; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
 
+/* Utility Classes for Responsive Toggles */
+.show-mobile { display: none !important; }
+
 /* Responsive Media Queries */
 @media (max-width: 1024px) {
   .grid-split, .publer-3col-layout { grid-template-columns: 1fr; gap: 1.25rem; }
+  .hide-mobile { display: none !important; }
+  .show-mobile { display: inline-flex !important; }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding: 4rem 0.5rem 65px 0.5rem;
+  }
+  
+  .app-header {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10000;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    border-bottom: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    gap: 0;
+  }
+  
+  .brand-logo {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 10000;
+  }
+  
+  .auth-area {
+    display: none !important;
+  }
+  
+  .nav-tabs {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+  }
+
+  .nav-tab {
+    flex: 1 1 0;
+    justify-content: center;
+    padding: 0.85rem 0;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .floating-action-bar {
+    bottom: calc(1.5rem + 60px) !important;
+  }
+  
+  .publer-modal {
+    padding: 1.5rem 1rem;
+    margin: 1rem;
+  }
+  
+  .social-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+
 }
 
 /* Animations & Utility */

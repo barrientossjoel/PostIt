@@ -32,7 +32,7 @@ export const Navbar: React.FC<Props> = ({
         <div className="brand-icon">
           <Share2 size={20} />
         </div>
-        <h1 className="brand-title">PostIt</h1>
+        <h1 className="brand-title hide-mobile">PostIt</h1>
       </div>
 
       {/* Centered Navigation Tabs */}
@@ -42,7 +42,7 @@ export const Navbar: React.FC<Props> = ({
           onClick={() => setActiveTab('explorer')}
         >
           <GitCommit size={16} />
-          <span>Explorador</span>
+          <span className="hide-mobile">Explorador</span>
         </button>
 
         <button
@@ -50,7 +50,7 @@ export const Navbar: React.FC<Props> = ({
           onClick={() => setActiveTab('pending')}
         >
           <Inbox size={16} />
-          <span>Pendientes</span>
+          <span className="hide-mobile">Pendientes</span>
           {pendingCount > 0 && <span className="badge-count">{pendingCount}</span>}
         </button>
 
@@ -59,7 +59,7 @@ export const Navbar: React.FC<Props> = ({
           onClick={() => setActiveTab('preview')}
         >
           <Edit3 size={16} />
-          <span>Editor & Preview</span>
+          <span className="hide-mobile">Editor & Preview</span>
         </button>
 
         <button
@@ -67,7 +67,7 @@ export const Navbar: React.FC<Props> = ({
           onClick={() => setActiveTab('settings')}
         >
           <SettingsIcon size={16} />
-          <span>Ajustes</span>
+          <span className="hide-mobile">Ajustes</span>
           {(!isGithubConfigured || !isGeminiConfigured) && (
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent-orange)' }} />
           )}
@@ -75,7 +75,7 @@ export const Navbar: React.FC<Props> = ({
       </nav>
 
       {/* Auth / Profile Area Top Right */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="auth-area" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
         {user ? (
           <button
             type="button"
@@ -90,7 +90,7 @@ export const Navbar: React.FC<Props> = ({
               className="account-avatar"
               style={{ width: '26px', height: '26px' }}
             />
-            <span className="account-name selected-text hide-mobile" style={{ fontSize: '0.82rem' }}>
+            <span className="account-name selected-text" style={{ fontSize: '0.82rem' }}>
               {user.name}
             </span>
           </button>
@@ -108,5 +108,3 @@ export const Navbar: React.FC<Props> = ({
     </header>
   );
 };
-
-

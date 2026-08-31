@@ -30,27 +30,26 @@ export const AccountsSidebar: React.FC<Props> = ({
 
   return (
     <div className="accounts-sidebar-card">
-      <div className="search-box">
-        <Search size={14} className="search-icon" />
-        <input
-          type="text"
-          placeholder="Search"
-          className="input-text search-input"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
+        <div className="search-box" style={{ flex: '1 1 auto', margin: 0, display: 'flex', minWidth: 0 }}>
+          <Search size={14} className="search-icon" />
+          <input
+            type="text"
+            placeholder="Search"
+            className="input-text search-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ width: '100%', height: '34px', boxSizing: 'border-box' }}
+          />
+        </div>
+
+        <button type="button" onClick={onOpenAddModal} className="btn-add-account" style={{ flex: '0 0 auto', margin: 0, padding: '0 0.75rem', whiteSpace: 'nowrap', height: '34px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <Plus size={14} /> <span className="hide-mobile">Add account</span>
+        </button>
       </div>
 
-      <button type="button" onClick={onOpenAddModal} className="btn-add-account">
-        <Plus size={14} /> Add account
-      </button>
-
       <div className="accounts-list">
-        {filtered.length === 0 ? (
-          <div className="empty-accounts-hint">
-            No hay cuentas agregadas. Haz clic en <strong>+ Add account</strong> para vincular tu primera red social.
-          </div>
-        ) : (
+        {filtered.length === 0 ? null : (
           filtered.map((acc) => {
             const badge = BADGE_MAP[acc.platform] || { bg: '#2f3336', text: '•' };
             return (
