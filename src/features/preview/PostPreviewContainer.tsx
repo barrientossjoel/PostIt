@@ -15,11 +15,7 @@ import {
   Send,
   FileText,
   Share2,
-  RotateCcw,
   Save,
-  UserCheck,
-  PlusCircle,
-  Tag,
 } from 'lucide-react';
 
 import type { UserProfile } from '../../core/entities/User';
@@ -29,7 +25,6 @@ interface Props {
   settings: AppSettings;
   user?: UserProfile | null;
   onPostUpdated: (post: Post) => void;
-  onNavigateToPending?: () => void;
   showToast: (msg: string, type?: 'success' | 'error') => void;
 }
 
@@ -40,15 +35,12 @@ export const PostPreviewContainer: React.FC<Props> = ({
   settings,
   user,
   onPostUpdated,
-  onNavigateToPending,
   showToast,
 }) => {
   const preview = usePostPreview(currentPost, settings, onPostUpdated, showToast);
   const [isSharePanelOpen, setIsSharePanelOpen] = useState(false);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
   const [translating, setTranslating] = useState(false);
-  const [showFirstComment, setShowFirstComment] = useState(false);
-  const [firstCommentText, setFirstCommentText] = useState('');
 
   // Persisted Social Accounts
   const [accounts, setAccounts] = useState<SocialAccount[]>(() => {
@@ -114,15 +106,6 @@ export const PostPreviewContainer: React.FC<Props> = ({
     showToast('Borrador guardado localmente', 'success');
   };
 
-  const handleReturnToPending = async () => {
-    if (!currentPost) return;
-    const pending: Post = { ...currentPost, content: preview.content, hashtags: [], status: 'pending' };
-    await container.postRepository.savePost(pending);
-    onPostUpdated(pending);
-    showToast('Devuelto a Pendientes', 'success');
-    onNavigateToPending?.();
-  };
-
   return (
     <div className="publer-3col-layout animate-fade-in">
       {/* Columna 1: Cuentas */}
@@ -133,45 +116,15 @@ export const PostPreviewContainer: React.FC<Props> = ({
       />
 
       {/* Columna 2: Editor */}
-      <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-secondary)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {activeAccount && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--bg-tertiary)', padding: '4px 10px', borderRadius: '9999px', border: '1px solid var(--border-color)', fontSize: '0.8rem', fontWeight: 600, color: '#00e5ff' }}>
-                <UserCheck size={14} color="#00e5ff" />
-                <span>@{activeAccount.handle || activeAccount.name}</span>
-              </div>
-            )}
-            {currentPost && <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>• {currentPost.commits.length} commit(s) de {currentPost.repoFullName}</span>}
-          </div>
-          {currentPost && (
-            <button className="btn btn-secondary btn-sm" onClick={handleReturnToPending} style={{ color: 'var(--accent-orange)', padding: '3px 8px', fontSize: '0.76rem' }}>
-              <RotateCcw size={13} /> Devolver a Pendientes
-            </button>
-          )}
-        </div>
+      <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.25rem' }}>
+            <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '5px', margin: 0 }}>
               <FileText size={14} color="var(--accent-blue)" /> Texto de la Publicación
             </label>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              <Tag size={12} style={{ display: 'inline', marginRight: 3 }} /> Editor Publer
-            </span>
-          </div>
-
-          {/* Publer Textarea Container con fondo transparente */}
-          <div className="publer-textarea-container">
-            <textarea
-              className="publer-textarea-input"
-              rows={9}
-              placeholder="Escribe el texto de tu publicación o usa el asistente IA para refinar tus commits..."
-              value={preview.content}
-              onChange={(e) => preview.setContent(e.target.value)}
-            />
-
-            {/* Toolbar con Bold, Italic, Emoji Picker, Attach Image, Signature y Traducir (con 1 solo icono) */}
+            
             <EditorToolbar
               content={preview.content}
               onChangeContent={(newVal) => preview.setContent(newVal)}
@@ -182,16 +135,19 @@ export const PostPreviewContainer: React.FC<Props> = ({
               showToast={showToast}
             />
           </div>
+
+          <div className="publer-textarea-container">
+            <textarea
+              className="publer-textarea-input"
+              rows={9}
+              placeholder="Escribe el texto de tu publicación o usa el asistente IA para refinar tus commits..."
+              value={preview.content}
+              onChange={(e) => preview.setContent(e.target.value)}
+            />
+          </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <button type="button" onClick={() => setShowFirstComment(!showFirstComment)} style={{ background: 'none', border: 'none', color: 'var(--accent-blue)', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', padding: 0 }}>
-            <PlusCircle size={14} /> {showFirstComment ? 'Ocultar primer comentario' : '+ Añadir primer comentario'}
-          </button>
-          {showFirstComment && (
-            <textarea className="textarea-input" rows={2} placeholder="Primer comentario automático..." style={{ fontSize: '0.82rem' }} value={firstCommentText} onChange={(e) => setFirstCommentText(e.target.value)} />
-          )}
-        </div>
+
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.85rem', marginTop: 'auto', gap: '0.65rem', flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', gap: '0.5rem' }}>

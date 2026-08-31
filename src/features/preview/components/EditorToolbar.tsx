@@ -119,6 +119,22 @@ export const EditorToolbar: React.FC<Props> = ({
           <Globe2 size={14} /> {translating ? '...' : 'Traducir'}
         </button>
 
+        {/* AI Assist Button */}
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={onRefine}
+          disabled={refining}
+          style={{
+            padding: '3px 9px',
+            fontSize: '0.78rem',
+            color: 'var(--accent-purple)',
+            borderColor: 'rgba(168, 85, 247, 0.4)',
+          }}
+        >
+          <Wand2 size={13} /> {refining ? 'IA...' : 'AI Assist'}
+        </button>
+
         {/* Emoji Picker Popover */}
         <EmojiPickerPopover
           isOpen={isEmojiOpen}
@@ -126,22 +142,6 @@ export const EditorToolbar: React.FC<Props> = ({
           onSelectEmoji={handleSelectEmoji}
         />
       </div>
-
-      {/* AI Assist Button */}
-      <button
-        type="button"
-        className="btn btn-secondary btn-sm"
-        onClick={onRefine}
-        disabled={refining}
-        style={{
-          padding: '3px 9px',
-          fontSize: '0.78rem',
-          color: 'var(--accent-purple)',
-          borderColor: 'rgba(168, 85, 247, 0.4)',
-        }}
-      >
-        <Wand2 size={13} /> {refining ? 'IA...' : 'AI Assist'}
-      </button>
 
       {/* Publer Signature Selection Modal */}
       <SignatureModal

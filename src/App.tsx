@@ -131,7 +131,6 @@ export function App() {
               setCurrentPost(post);
               updatePendingCount();
             }}
-            onNavigateToPending={() => setActiveTab('pending')}
             showToast={showToast}
           />
         )}
@@ -142,6 +141,7 @@ export function App() {
             user={user}
             onSettingsSaved={handleSettingsSaved}
             showToast={showToast}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
           />
         )}
       </main>
