@@ -69,7 +69,7 @@ export function App() {
       name,
       avatarUrl: avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${email}`,
       provider: 'google',
-      connectedAccounts: user?.connectedAccounts || { x: true, linkedin: true, facebook: false },
+      connectedAccounts: user?.connectedAccounts || { x: false, linkedin: false, facebook: false },
     };
     setUser(newUser);
     localStorage.setItem(SESSION_KEY, JSON.stringify(newUser));
