@@ -3,7 +3,7 @@ import type { AppSettings } from '../../core/entities/Settings';
 import type { UserProfile } from '../../core/entities/User';
 import type { SocialAccount } from '../preview/types/SocialAccount';
 import { useSettings } from './hooks/useSettings';
-import { Key, Save, ExternalLink, ShieldCheck, Sparkles, Share2, Check, CheckCircle2, AlertCircle, Settings2, Plus } from 'lucide-react';
+import { Save, ExternalLink, Check, CheckCircle2, AlertCircle, Settings2, Plus } from 'lucide-react';
 import { SocialAccountSettingsModal } from './components/SocialAccountSettingsModal';
 import { AddSocialAccountModal } from '../preview/components/AddSocialAccountModal';
 
@@ -12,6 +12,7 @@ interface Props {
   user?: UserProfile | null;
   onSettingsSaved: (s: AppSettings) => void;
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
+  onOpenAuth?: () => void;
 }
 
 const STORAGE_KEY = 'postit_social_accounts';
@@ -21,6 +22,7 @@ export const SettingsContainer: React.FC<Props> = ({
   user,
   onSettingsSaved,
   showToast,
+  onOpenAuth,
 }) => {
   const { form, updateField, testingGithub, githubUser, testGithubToken, saveSettings } =
     useSettings(settings, onSettingsSaved, showToast);
@@ -75,11 +77,33 @@ export const SettingsContainer: React.FC<Props> = ({
 
   return (
     <div className="animate-fade-in" style={{ maxWidth: '760px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      {/* SECCIÓN 0: Perfil de Usuario */}
+      <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+
+            <div>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{user ? user.name : 'Cuenta de Usuario'}</h2>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                {user ? user.email : 'Inicia sesión para sincronizar tus configuraciones y redes sociales.'}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className={user ? "btn btn-secondary btn-sm" : "btn btn-primary btn-sm"}
+            onClick={onOpenAuth}
+          >
+            {user ? 'Cerrar Sesión / Gestionar' : 'Iniciar Sesión'}
+          </button>
+        </div>
+      </div>
+
       {/* SECCIÓN 1: Redes Sociales Conectadas */}
       <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.85rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Share2 size={22} color="var(--accent-cyan)" />
+
             <div>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Redes Sociales Conectadas</h2>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
@@ -176,7 +200,7 @@ export const SettingsContainer: React.FC<Props> = ({
       <div className="github-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.85rem', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Key size={24} color="var(--accent-blue)" />
+
             <div>
               <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Configuración y Credenciales</h2>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
@@ -220,7 +244,7 @@ export const SettingsContainer: React.FC<Props> = ({
         <div className="input-group">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <ShieldCheck size={14} color="var(--accent-blue)" /> Token Personal de GitHub (PAT)
+              Token Personal de GitHub (PAT)
             </label>
             <a
               href="https://github.com/settings/tokens/new?scopes=repo&description=PostItApp"
@@ -259,7 +283,7 @@ export const SettingsContainer: React.FC<Props> = ({
         <div className="input-group">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles size={14} color="var(--accent-purple)" /> API Key de Google Gemini (Gratis)
+              API Key de Google Gemini (Gratis)
             </label>
             <a
               href="https://aistudio.google.com/app/apikey"
@@ -283,7 +307,7 @@ export const SettingsContainer: React.FC<Props> = ({
         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }} className="input-group">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Share2 size={14} color="var(--accent-github-hover)" /> Publer API Key (Opcional)
+              Publer API Key (Opcional)
             </label>
             <a
               href="https://publer.io"
@@ -315,7 +339,7 @@ export const SettingsContainer: React.FC<Props> = ({
         </div>
 
         {/* AI Defaults */}
-        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           <div className="input-group">
             <label className="input-label">Tono Predeterminado de IA</label>
             <select
