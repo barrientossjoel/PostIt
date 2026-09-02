@@ -48,7 +48,7 @@ export class GeneratePostFromCommitsUseCase {
       aiTone: settings.aiTone,
     };
 
-    this.postRepo.savePost(newPost);
+    await this.postRepo.savePost(newPost);
     return newPost;
   }
 }

@@ -164,7 +164,7 @@ export function useRepoExplorer(
     }
   };
 
-  const generatePostFromSelectedCommits = () => {
+  const generatePostFromSelectedCommits = async () => {
     if (!selectedRepo || selectedCommitShas.length === 0) return;
 
     const selectedCommits = commits.filter((c) => selectedCommitShas.includes(c.sha));
@@ -205,7 +205,7 @@ export function useRepoExplorer(
       aiTone: settings.aiTone,
     };
 
-    container.postRepository.savePost(newPost);
+    await container.postRepository.savePost(newPost);
     onPostGenerated(newPost);
     showToast('Post en borrador generado desde los commits', 'success');
   };

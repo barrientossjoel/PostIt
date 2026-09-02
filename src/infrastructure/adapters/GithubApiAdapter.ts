@@ -31,11 +31,12 @@ export class GithubApiAdapter implements IGithubService {
   }
 
   async verifyToken(token: string): Promise<{ username: string; avatarUrl: string }> {
-    if (!token) {
+    if (!token?.trim()) {
       throw new Error('No se ha configurado un token de GitHub');
     }
 
-    const cacheKey = `user:${token}`;
+    const cleanToken = token.trim();
+    const cacheKey = `user:${cleanToken}`;
     const cachedUser = this.getFromCache<{ username: string; avatarUrl: string }>(cacheKey, 10 * 60 * 1000);
     if (cachedUser) {
       return cachedUser;
@@ -43,7 +44,7 @@ export class GithubApiAdapter implements IGithubService {
 
     const res = await fetch(`${this.baseUrl}/user`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${cleanToken}`,
         Accept: 'application/vnd.github+json',
       },
     });
@@ -63,11 +64,12 @@ export class GithubApiAdapter implements IGithubService {
   }
 
   async fetchUserRepositories(token: string): Promise<Repository[]> {
-    if (!token) {
+    if (!token?.trim()) {
       return [];
     }
 
-    const cacheKey = `repos:${token}`;
+    const cleanToken = token.trim();
+    const cacheKey = `repos:${cleanToken}`;
     const cachedRepos = this.getFromCache<Repository[]>(cacheKey);
     if (cachedRepos) {
       return cachedRepos;
@@ -76,7 +78,7 @@ export class GithubApiAdapter implements IGithubService {
     try {
       const res = await fetch(`${this.baseUrl}/user/repos?sort=updated&per_page=100`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${cleanToken}`,
           Accept: 'application/vnd.github+json',
         },
       });
@@ -117,7 +119,7 @@ export class GithubApiAdapter implements IGithubService {
     page: number = 1,
     sortOrder: 'desc' | 'asc' = 'desc'
   ): Promise<Commit[]> {
-    if (!token || !repoFullName) {
+    if (!token?.trim() || !repoFullName) {
       return [];
     }
 
@@ -132,7 +134,7 @@ export class GithubApiAdapter implements IGithubService {
         `${this.baseUrl}/repos/${repoFullName}/commits?per_page=${limit}&page=${page}`,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token.trim()}`,
             Accept: 'application/vnd.github+json',
           },
         }

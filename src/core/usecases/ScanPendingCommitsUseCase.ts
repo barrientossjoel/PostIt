@@ -24,7 +24,8 @@ export class ScanPendingCommitsUseCase {
       throw new Error('Configura tu Token de GitHub en Ajustes primero.');
     }
 
-    const processedShas = new Set(this.postRepo.getProcessedShas());
+    const processedShasArray = await this.postRepo.getProcessedShas();
+    const processedShas = new Set(processedShasArray);
     const newPendingPosts: Post[] = [];
 
     for (const repo of repos) {
@@ -60,8 +61,8 @@ export class ScanPendingCommitsUseCase {
             aiTone: settings.aiTone,
           };
 
-          this.postRepo.savePost(pendingPost);
-          this.postRepo.markShasProcessed(commitsToProcess.map((c) => c.sha));
+          await this.postRepo.savePost(pendingPost);
+          await this.postRepo.markShasProcessed(commitsToProcess.map((c) => c.sha));
           newPendingPosts.push(pendingPost);
         }
       } catch (e) {

@@ -1,5 +1,8 @@
 # PostIt — Master TODO List
 
+## Pending Tasks 🚧
+- [ ] **Instagram Carousel Generator**: Implement a feature to group multiple commits into a longer article, and then split the text across multiple images using an Instagram post canvas template.
+
 ## Completed Tasks ✅
 - [x] Initial project setup with Vite + React + TypeScript + Bun (`/mnt/Disco_SDB/Workspace/PostIt`).
 - [x] Clean & Screaming Architecture layer separation (`core/entities`, `core/interfaces`, `core/usecases`, `infrastructure/adapters`, `infrastructure/publishing`, `features/*`).

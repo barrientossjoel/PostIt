@@ -13,8 +13,8 @@ export function usePendingQueue(
     loadPendingPosts();
   }, []);
 
-  const loadPendingPosts = () => {
-    const all = container.postRepository.getAllPosts();
+  const loadPendingPosts = async () => {
+    const all = await container.postRepository.getAllPosts();
     setPosts(all.filter((p) => p.status === 'pending'));
   };
 
@@ -36,14 +36,14 @@ export function usePendingQueue(
     onSelectForPreview(post);
   };
 
-  const handleDismiss = (id: string) => {
-    container.postRepository.deletePost(id);
+  const handleDismiss = async (id: string) => {
+    await container.postRepository.deletePost(id);
     setSelectedPostIds((prev) => prev.filter((i) => i !== id));
-    loadPendingPosts();
+    await loadPendingPosts();
     showToast('Post pendiente descartado', 'success');
   };
 
-  const generateCombinedPostFromSelected = () => {
+  const generateCombinedPostFromSelected = async () => {
     if (selectedPostIds.length === 0) return;
 
     const selectedPosts = posts.filter((p) => selectedPostIds.includes(p.id));
@@ -63,7 +63,6 @@ export function usePendingQueue(
       const combinedTitle = `Actualización de ${repoNames.join(', ')}`;
       const combinedContent = selectedPosts.map((p) => p.content).join('\n\n---\n\n');
 
-
       combinedPost = {
         id: `post_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
         repoFullName: repoNames.join(', '),
@@ -78,14 +77,18 @@ export function usePendingQueue(
     }
 
     // Save combined post and remove combined pending items
-    container.postRepository.savePost(combinedPost);
-    selectedPosts.forEach((p) => {
-      if (p.id !== combinedPost.id) {
-        container.postRepository.deletePost(p.id);
-      }
-    });
+    await container.postRepository.savePost(combinedPost);
+    
+    // We should use Promise.all to delete parallelly
+    await Promise.all(
+      selectedPosts.map(async (p) => {
+        if (p.id !== combinedPost.id) {
+          await container.postRepository.deletePost(p.id);
+        }
+      })
+    );
 
-    loadPendingPosts();
+    await loadPendingPosts();
     setSelectedPostIds([]);
     onSelectForPreview(combinedPost);
     showToast('Post generado con éxito en el Editor', 'success');

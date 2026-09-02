@@ -41,7 +41,7 @@ export function usePostPreview(
           content: refinedText,
           updatedAt: new Date().toISOString(),
         };
-        container.postRepository.savePost(updated);
+        await container.postRepository.savePost(updated);
         onPostUpdated(updated);
       }
 

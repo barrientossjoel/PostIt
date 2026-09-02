@@ -27,7 +27,7 @@ export class PublishPostUseCase {
         status: 'published',
         updatedAt: new Date().toISOString(),
       };
-      this.postRepo.savePost(updatedPost);
+      await this.postRepo.savePost(updatedPost);
     }
 
     return result;
