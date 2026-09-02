@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import type { Post } from '../../core/entities/Post';
 import type { AppSettings } from '../../core/entities/Settings';
 import { usePostPreview } from './hooks/usePostPreview';
@@ -41,6 +41,7 @@ export const PostPreviewContainer: React.FC<Props> = ({
   const [isSharePanelOpen, setIsSharePanelOpen] = useState(false);
   const [isAddAccountOpen, setIsAddAccountOpen] = useState(false);
   const [translating, setTranslating] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Persisted Social Accounts
   const [accounts, setAccounts] = useState<SocialAccount[]>(() => {
@@ -133,11 +134,13 @@ export const PostPreviewContainer: React.FC<Props> = ({
               onRefine={() => preview.handleRefine('Redacta un post atractivo para devs')}
               refining={preview.refining}
               showToast={showToast}
+              textareaRef={textareaRef}
             />
           </div>
 
           <div className="publer-textarea-container">
             <textarea
+              ref={textareaRef}
               className="publer-textarea-input"
               rows={9}
               placeholder="Escribe el texto de tu publicación o usa el asistente IA para refinar tus commits..."

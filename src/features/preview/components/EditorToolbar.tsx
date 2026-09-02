@@ -11,6 +11,7 @@ interface Props {
   onRefine: () => void;
   refining: boolean;
   showToast: (msg: string, type?: 'success' | 'error') => void;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 export const EditorToolbar: React.FC<Props> = ({
@@ -21,22 +22,61 @@ export const EditorToolbar: React.FC<Props> = ({
   onRefine,
   refining,
   showToast,
+  textareaRef,
 }) => {
   const [isEmojiOpen, setIsEmojiOpen] = useState(false);
   const [isSignatureOpen, setIsSignatureOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Helper to insert text preserving undo stack
+  const insertTextPreservingUndo = (textToInsert: string, prefixLen?: number, defaultTextLen?: number) => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.focus();
+      const start = textarea.selectionStart;
+      const success = document.execCommand('insertText', false, textToInsert);
+      if (!success) {
+        // Fallback
+        const end = textarea.selectionEnd;
+        const newText = content.substring(0, start) + textToInsert + content.substring(end);
+        onChangeContent(newText);
+      }
+      if (prefixLen !== undefined && defaultTextLen !== undefined) {
+        setTimeout(() => {
+          if (textareaRef.current) {
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(start + prefixLen, start + prefixLen + defaultTextLen);
+          }
+        }, 0);
+      }
+    } else {
+      onChangeContent(`${content}${textToInsert}`);
+    }
+  };
+
   // Formatting helpers
   const handleApplyFormat = (prefix: string, suffix: string) => {
-    onChangeContent(`${content}${prefix}texto${suffix}`);
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const selected = textarea.value.substring(start, end);
+      if (selected) {
+        insertTextPreservingUndo(`${prefix}${selected}${suffix}`);
+      } else {
+        insertTextPreservingUndo(`${prefix}texto${suffix}`, prefix.length, 5);
+      }
+    } else {
+      onChangeContent(`${content}${prefix}texto${suffix}`);
+    }
   };
 
   const handleSelectEmoji = (emoji: string) => {
-    onChangeContent(`${content} ${emoji}`);
+    insertTextPreservingUndo(emoji);
   };
 
   const handleApplySignature = (sigText: string) => {
-    onChangeContent(`${content}${sigText}`);
+    insertTextPreservingUndo(`\n${sigText}`);
     showToast('Firma añadida al final de la publicación', 'success');
   };
 
