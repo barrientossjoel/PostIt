@@ -31,20 +31,20 @@ export const AccountsSidebar: React.FC<Props> = ({
   return (
     <div className="accounts-sidebar-card">
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'stretch' }}>
-        <div className="search-box" style={{ flex: '1 1 auto', margin: 0, display: 'flex', minWidth: 0 }}>
-          <Search size={14} className="search-icon" />
+        <div className="search-box" style={{ flex: '1 1 auto', margin: 0, display: 'flex' }}>
+          <Search size={14} className="search-icon" style={{ left: '8px' }} />
           <input
             type="text"
             placeholder="Search"
             className="input-text search-input"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{ width: '100%', height: '34px', boxSizing: 'border-box' }}
+            style={{ width: '100%', height: '34px', boxSizing: 'border-box', paddingLeft: '26px', paddingRight: '8px' }}
           />
         </div>
 
-        <button type="button" onClick={onOpenAddModal} className="btn-add-account" style={{ flex: '0 0 auto', margin: 0, padding: '0 0.75rem', whiteSpace: 'nowrap', height: '34px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Plus size={14} /> <span className="hide-mobile">Add account</span>
+        <button type="button" onClick={onOpenAddModal} className="btn-add-account" title="Add account" style={{ flex: '0 0 auto', margin: 0, padding: 0, width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Plus size={16} />
         </button>
       </div>
 
