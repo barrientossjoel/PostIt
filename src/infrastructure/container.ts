@@ -1,27 +1,28 @@
 import type { IGithubService } from '../core/interfaces/IGithubService';
 import type { IAiGeneratorService } from '../core/interfaces/IAiGeneratorService';
-import type { IPostRepository } from '../core/interfaces/IPostRepository';
-import type { ISettingsRepository } from '../core/interfaces/ISettingsRepository';
+
 
 import { GithubApiAdapter } from './adapters/GithubApiAdapter';
 import { GeminiAiAdapter } from './adapters/GeminiAiAdapter';
-import { LocalStorageRepository } from './adapters/LocalStorageRepository';
+import { TursoRepository } from './adapters/TursoRepository';
 
 class ServiceContainer {
   private static instance: ServiceContainer;
 
   public readonly githubService: IGithubService;
   public readonly aiGeneratorService: IAiGeneratorService;
-  public readonly postRepository: IPostRepository;
-  public readonly settingsRepository: ISettingsRepository;
+  public readonly postRepository: TursoRepository;
+  public readonly settingsRepository: TursoRepository;
+  public readonly tursoRepository: TursoRepository;
 
   private constructor() {
-    const localStorageRepo = new LocalStorageRepository();
+    const tursoRepo = new TursoRepository();
 
     this.githubService = new GithubApiAdapter();
     this.aiGeneratorService = new GeminiAiAdapter();
-    this.postRepository = localStorageRepo;
-    this.settingsRepository = localStorageRepo;
+    this.postRepository = tursoRepo;
+    this.settingsRepository = tursoRepo;
+    this.tursoRepository = tursoRepo;
   }
 
   public static getInstance(): ServiceContainer {

@@ -4,7 +4,7 @@ import { container } from '../../../infrastructure/container';
 
 export function useSettings(
   initialSettings: AppSettings,
-  onSettingsSaved: (s: AppSettings) => void,
+  onSettingsSaved: (s: AppSettings) => Promise<void> | void,
   showToast: (msg: string, type?: 'success' | 'error') => void
 ) {
   const [form, setForm] = useState<AppSettings>(initialSettings);
@@ -34,9 +34,8 @@ export function useSettings(
     }
   };
 
-  const saveSettings = () => {
-    container.settingsRepository.saveSettings(form);
-    onSettingsSaved(form);
+  const saveSettings = async () => {
+    await onSettingsSaved(form);
     showToast('Ajustes guardados correctamente', 'success');
   };
 

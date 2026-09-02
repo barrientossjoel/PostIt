@@ -9,6 +9,7 @@ import type { TabId } from './features/shared/components/Navbar';
 import { ToastContainer } from './features/shared/components/Toast';
 import type { ToastMessage } from './features/shared/components/Toast';
 import { GoogleAuthModal } from './features/auth/GoogleAuthModal';
+import { OAuthCallbackPage } from './features/auth/OAuthCallbackPage';
 
 import { RepoExplorerContainer } from './features/explorer/RepoExplorerContainer';
 import { PendingQueueContainer } from './features/pending/PendingQueueContainer';
@@ -17,17 +18,29 @@ import { SettingsContainer } from './features/settings/SettingsContainer';
 
 const SESSION_KEY = 'postit_user_session';
 
-export function App() {
-  const [activeTab, setActiveTab] = useState<TabId>('explorer');
+const defaultSettings: AppSettings = {
+  githubToken: '',
+  geminiApiKey: '',
+  publerApiKey: '',
+  publerWorkspaceId: '',
+  aiTone: 'developer',
+  aiLanguage: 'es',
+  enabledRepoIds: [],
+};
 
-  const [settings, setSettings] = useState<AppSettings>(() =>
-    container.settingsRepository.getSettings()
-  );
+export function App() {
+  // Render the lightweight OAuth callback page inside the popup window
+  if (window.location.pathname === '/oauth-callback') {
+    return <OAuthCallbackPage />;
+  }
+
+  const [activeTab, setActiveTab] = useState<TabId>('explorer');
+  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [currentPost, setCurrentPost] = useState<Post | null>(null);
   const [pendingCount, setPendingCount] = useState<number>(0);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
-  // User Authentication State (Starts clean / null until authenticated)
+  // User Authentication State
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
       const saved = localStorage.getItem(SESSION_KEY);
@@ -40,11 +53,23 @@ export function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   useEffect(() => {
+    // Sync userId with Turso DB
+    container.tursoRepository.setUserId(user?.email || null);
+    
+    if (user) {
+      container.settingsRepository.getSettings().then(setSettings);
+    } else {
+      setSettings(defaultSettings);
+    }
+    updatePendingCount();
+  }, [user]);
+
+  useEffect(() => {
     updatePendingCount();
   }, [activeTab]);
 
-  const updatePendingCount = () => {
-    const allPosts = container.postRepository.getAllPosts();
+  const updatePendingCount = async () => {
+    const allPosts = await container.postRepository.getAllPosts();
     const count = allPosts.filter((p) => p.status === 'pending').length;
     setPendingCount(count);
   };
@@ -57,9 +82,9 @@ export function App() {
     }, 4000);
   };
 
-  const handleSettingsSaved = (newSettings: AppSettings) => {
+  const handleSettingsSaved = async (newSettings: AppSettings) => {
     setSettings(newSettings);
-    container.settingsRepository.saveSettings(newSettings);
+    await container.settingsRepository.saveSettings(newSettings);
   };
 
   const handleLoginWithGoogle = (email: string, name: string, avatarUrl?: string) => {
@@ -162,4 +187,3 @@ export function App() {
 }
 
 export default App;
-

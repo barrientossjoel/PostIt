@@ -10,7 +10,7 @@ import { AddSocialAccountModal } from '../preview/components/AddSocialAccountMod
 interface Props {
   settings: AppSettings;
   user?: UserProfile | null;
-  onSettingsSaved: (s: AppSettings) => void;
+  onSettingsSaved: (s: AppSettings) => Promise<void> | void;
   showToast: (msg: string, type?: 'success' | 'error' | 'info') => void;
   onOpenAuth?: () => void;
 }
