@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { UserProfile } from '../../core/entities/User';
-import { LogOut, CheckCircle2, Globe, Shield, Key } from 'lucide-react';
+import { LogOut, CheckCircle2, Globe, Shield } from 'lucide-react';
 
 interface Props {
   user: UserProfile | null;
@@ -53,10 +53,9 @@ export const GoogleAuthModal: React.FC<Props> = ({
   showToast,
 }) => {
 
-  const [clientId, setClientId] = useState<string>(() => {
+  const [clientId] = useState<string>(() => {
     return import.meta.env.VITE_GOOGLE_CLIENT_ID || localStorage.getItem('postit_google_client_id') || '';
   });
-  const [isSavedClientId, setIsSavedClientId] = useState<boolean>(() => !!clientId);
   const [googleScriptLoaded, setGoogleScriptLoaded] = useState(false);
 
   const googleBtnRef = useRef<HTMLDivElement>(null);
@@ -114,14 +113,7 @@ export const GoogleAuthModal: React.FC<Props> = ({
 
   if (!isOpen) return null;
 
-  const handleSaveClientId = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (clientId.trim()) {
-      localStorage.setItem('postit_google_client_id', clientId.trim());
-      setIsSavedClientId(true);
-      showToast('Client ID de Google guardado correctamente', 'success');
-    }
-  };
+
 
 
 
@@ -318,28 +310,7 @@ export const GoogleAuthModal: React.FC<Props> = ({
               Conecta tu cuenta de Google para sincronizar tus tokens de GitHub, Gemini API y redes conectadas entre navegadores.
             </p>
 
-            {/* Google OAuth Client ID Configuration Box */}
-            <form onSubmit={handleSaveClientId} style={{ background: 'var(--bg-tertiary)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                <Key size={15} color="var(--accent-x)" /> Google OAuth Client ID (Google Cloud Console)
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input
-                  type="text"
-                  className="input-text"
-                  placeholder="ej. 123456789-abc.apps.googleusercontent.com"
-                  value={clientId}
-                  onChange={(e) => {
-                    setClientId(e.target.value);
-                    setIsSavedClientId(false);
-                  }}
-                  style={{ fontSize: '0.8rem', flex: 1 }}
-                />
-                <button type="submit" className="btn btn-sm btn-secondary" style={{ whiteSpace: 'nowrap' }}>
-                  {isSavedClientId ? 'Guardado ✓' : 'Guardar'}
-                </button>
-              </div>
-            </form>
+
 
             {/* Official Google OAuth Popup Button (rendered when Client ID is configured) */}
             {clientId.trim() ? (
