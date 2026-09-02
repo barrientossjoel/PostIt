@@ -331,48 +331,48 @@ export const SocialCardSimulator: React.FC<Props> = ({
           >
             {activePlatform === 'linkedin' ? (
               <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                  <ThumbsUp size={15} /> Me gusta
+                <span title="Me gusta" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <ThumbsUp size={15} />
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                  <MessageCircle size={15} /> Comentar
+                <span title="Comentar" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <MessageCircle size={15} />
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                  <Repeat size={15} /> Repostear
+                <span title="Repostear" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <Repeat size={15} />
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                  <Send size={15} /> Enviar
+                <span title="Enviar" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <Send size={15} />
                 </span>
               </div>
             ) : activePlatform === 'x' ? (
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                  <MessageSquare size={15} /> Responder
+                <span title="Responder" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <MessageSquare size={15} />
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                  <Repeat size={15} /> Repostear
+                <span title="Repostear" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <Repeat size={15} />
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                  <Heart size={15} /> Me gusta
+                <span title="Me gusta" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <Heart size={15} />
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                  <BarChart2 size={15} /> Vistas
+                <span title="Vistas" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <BarChart2 size={15} />
                 </span>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                  <Bookmark size={15} style={{ cursor: 'pointer' }} />
-                  <Share size={15} style={{ cursor: 'pointer' }} />
+                  <span title="Guardar"><Bookmark size={15} style={{ cursor: 'pointer' }} /></span>
+                  <span title="Compartir"><Share size={15} style={{ cursor: 'pointer' }} /></span>
                 </div>
               </div>
             ) : (
               <div style={{ display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                  <ThumbsUp size={15} /> Me gusta
+                <span title="Me gusta" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <ThumbsUp size={15} />
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                  <MessageCircle size={15} /> Comentar
+                <span title="Comentar" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <MessageCircle size={15} />
                 </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
-                  <Share size={15} /> Compartir
+                <span title="Compartir" style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                  <Share size={15} />
                 </span>
               </div>
             )}
