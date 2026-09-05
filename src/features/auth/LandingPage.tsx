@@ -92,57 +92,43 @@ export const LandingPage: React.FC<Props> = ({ onLoginWithGoogle, onLoginWithEma
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      background: 'var(--bg-primary)',
-    }}>
-      {/* Navbar */}
-      <header style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '1.5rem 3rem',
-        borderBottom: '1px solid var(--border-color)',
-        background: 'var(--bg-secondary)',
-      }}>
-        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-          Post It
-        </div>
-        <button 
-          onClick={() => setIsLoginModalOpen(true)}
-          className="btn-primary"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-        >
-          <LogIn size={18} />
-          Iniciar Sesión
-        </button>
-      </header>
+    <>
+      <div className="aurora-bg">
+        <div className="aurora-blob blob-1"></div>
+        <div className="aurora-blob blob-2"></div>
+        <div className="aurora-blob blob-3"></div>
+      </div>
 
-      {/* Hero Section */}
-      <main style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem',
-        textAlign: 'center',
-      }}>
-        <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--text-primary)' }}>
-          Bienvenido a Post It
-        </h1>
-        <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '600px', marginBottom: '2rem', lineHeight: 1.6 }}>
-          Gestiona, automatiza y publica tu contenido en redes sociales de manera fácil e inteligente.
-        </p>
-        <button 
-          onClick={() => setIsLoginModalOpen(true)}
-          className="btn-primary"
-          style={{ padding: '0.75rem 2rem', fontSize: '1.1rem' }}
-        >
-          Comenzar ahora
-        </button>
+      <div className="navbar-wrapper animate-slide-up">
+        <nav className="navbar-pill">
+          <div className="navbar-brand">
+            <span className="brand-logo">📝</span>
+            <span className="brand-name">Post It</span>
+          </div>
+          <div className="navbar-links">
+            <button onClick={() => setIsLoginModalOpen(true)} className="nav-link" style={{ background: 'transparent', border: 'none', cursor: 'pointer' }}>
+              Iniciar Sesión
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      <main className="main-container">
+        <header className="hero-section">
+          <div className="hero-content">
+            <h1 className="hero-title animate-slide-up">
+              Gestiona tu contenido con <span style={{ color: 'var(--accent-cyan)' }}>Post It</span>.
+            </h1>
+            <p className="hero-subtitle animate-slide-up delay-1">
+              Gestiona, automatiza y publica tu contenido en redes sociales de manera fácil e inteligente.
+            </p>
+            <div className="hero-actions animate-slide-up delay-2">
+              <button onClick={() => setIsLoginModalOpen(true)} className="landing-btn-primary">
+                Comenzar ahora
+              </button>
+            </div>
+          </div>
+        </header>
       </main>
 
       {/* Login Modal */}
@@ -150,22 +136,25 @@ export const LandingPage: React.FC<Props> = ({ onLoginWithGoogle, onLoginWithEma
         <div style={{
           position: 'fixed',
           top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          backdropFilter: 'blur(4px)',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(8px)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000,
+          zIndex: 10000,
           padding: '1rem'
         }}>
-          <div className="github-card animate-fade-in" style={{ 
+          <div className="github-card animate-slide-up" style={{ 
             width: '100%', 
             maxWidth: '400px', 
             padding: '2.5rem 2rem', 
             position: 'relative',
             display: 'flex', 
             flexDirection: 'column', 
-            alignItems: 'center' 
+            alignItems: 'center',
+            background: 'rgba(15, 15, 15, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.5)'
           }}>
             <button 
               onClick={() => setIsLoginModalOpen(false)}
@@ -185,7 +174,7 @@ export const LandingPage: React.FC<Props> = ({ onLoginWithGoogle, onLoginWithEma
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Iniciar Sesión</h2>
             
             <form onSubmit={handleEmailLogin} style={{ width: '100%', marginBottom: '1.5rem' }}>
-              <div style={{ marginBottom: '1rem' }}>
+              <div style={{ marginBottom: '1rem', textAlign: 'left' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                   Usuario o Email
                 </label>
@@ -194,17 +183,10 @@ export const LandingPage: React.FC<Props> = ({ onLoginWithGoogle, onLoginWithEma
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="ejemplo@correo.com"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-primary)',
-                    color: 'var(--text-primary)'
-                  }}
+                  className="input-text"
                 />
               </div>
-              <div style={{ marginBottom: '1.5rem' }}>
+              <div style={{ marginBottom: '1.5rem', textAlign: 'left' }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                   Contraseña
                 </label>
@@ -213,37 +195,30 @@ export const LandingPage: React.FC<Props> = ({ onLoginWithGoogle, onLoginWithEma
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-primary)',
-                    color: 'var(--text-primary)'
-                  }}
+                  className="input-text"
                 />
               </div>
-              <button type="submit" className="btn-primary" style={{ width: '100%', justifyContent: 'center' }}>
-                Iniciar Sesión
+              <button type="submit" className="landing-btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '0.75rem' }}>
+                Entrar
               </button>
             </form>
 
             <div style={{ width: '100%', display: 'flex', alignItems: 'center', margin: '1rem 0' }}>
-              <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }}></div>
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
               <span style={{ padding: '0 1rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>O</span>
-              <div style={{ flex: 1, height: '1px', background: 'var(--border-color)' }}></div>
+              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }}></div>
             </div>
             
             {clientId ? (
               <div ref={googleBtnRef} style={{ width: '100%', display: 'flex', justifyContent: 'center', minHeight: '40px' }} />
             ) : (
               <div style={{ color: 'var(--accent-red)', fontSize: '0.85rem', padding: '1rem', border: '1px solid var(--accent-red)', borderRadius: '8px' }}>
-                Falta configurar VITE_GOOGLE_CLIENT_ID en el archivo .env
+                Falta configurar VITE_GOOGLE_CLIENT_ID
               </div>
             )}
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
