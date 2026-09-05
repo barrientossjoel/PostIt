@@ -16,7 +16,7 @@ import { PendingQueueContainer } from './features/pending/PendingQueueContainer'
 import { PostPreviewContainer } from './features/preview/PostPreviewContainer';
 import { SettingsContainer } from './features/settings/SettingsContainer';
 
-import { LoginPage } from './features/auth/LoginPage';
+import { LandingPage } from './features/auth/LandingPage';
 
 const SESSION_KEY = 'postit_user_session';
 
@@ -97,6 +97,20 @@ function MainApp() {
     localStorage.setItem(SESSION_KEY, JSON.stringify(newUser));
   };
 
+  const handleLoginWithEmail = (email: string) => {
+    const name = email.split('@')[0];
+    const newUser: UserProfile = {
+      id: `usr_${Date.now()}`,
+      email,
+      name,
+      avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${email}`,
+      provider: 'guest',
+      connectedAccounts: user?.connectedAccounts || { x: false, linkedin: false, facebook: false },
+    };
+    setUser(newUser);
+    localStorage.setItem(SESSION_KEY, JSON.stringify(newUser));
+  };
+
   const handleLogout = () => {
     setUser(null);
     localStorage.setItem(SESSION_KEY, ''); // Emptying string to remove session
@@ -115,7 +129,11 @@ function MainApp() {
   if (!user) {
     return (
       <>
-        <LoginPage onLoginWithGoogle={handleLoginWithGoogle} showToast={showToast} />
+        <LandingPage 
+          onLoginWithGoogle={handleLoginWithGoogle} 
+          onLoginWithEmail={handleLoginWithEmail}
+          showToast={showToast} 
+        />
         <ToastContainer toasts={toasts} />
       </>
     );
