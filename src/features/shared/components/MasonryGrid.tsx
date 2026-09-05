@@ -36,7 +36,6 @@ interface MasonryItemProps {
 const MasonryItem: React.FC<MasonryItemProps> = ({ children, gap, columnWidth }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [spans, setSpans] = useState(1);
-  const [colSpans, setColSpans] = useState(1);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -49,25 +48,20 @@ const MasonryItem: React.FC<MasonryItemProps> = ({ children, gap, columnWidth })
       for (let entry of entries) {
         // ScrollHeight allows us to capture the full natural size even if it's currently smaller
         const height = entry.target.getBoundingClientRect().height;
-        const width = entry.target.getBoundingClientRect().width;
         
         // Calculate vertical span (row height = 10px)
         const rowSpan = Math.ceil((height + gap) / 10);
         
-        // Calculate horizontal span (if resized wider than its initial slot)
-        const colSpan = Math.max(1, Math.ceil((width + gap) / (columnWidth + gap)));
-        
         setSpans(rowSpan);
-        setColSpans(colSpan);
       }
     });
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [gap, columnWidth]);
+  }, [gap]);
 
   return (
-    <div style={{ gridRowEnd: `span ${spans}`, gridColumnEnd: `span ${colSpans}` }}>
+    <div style={{ gridRowEnd: `span ${spans}` }}>
       <div ref={ref} style={{ height: '100%', width: '100%' }}>
         {children}
       </div>

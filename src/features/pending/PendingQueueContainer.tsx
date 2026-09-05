@@ -33,12 +33,11 @@ const ResizablePendingCard: React.FC<ResizableCardProps> = ({ post, queue }) => 
         border: isSelected ? '1.5px solid var(--accent-cyan)' : undefined,
         position: 'relative',
         width: '100%',
-        height: '100%',
         minHeight: '220px',
         boxSizing: 'border-box',
         transition: 'border 0.2s ease, box-shadow 0.2s ease',
         boxShadow: isSelected ? '0 4px 20px rgba(0, 229, 255, 0.15)' : 'none',
-        resize: 'both',
+        resize: 'vertical',
         overflow: 'hidden',
       }}
     >

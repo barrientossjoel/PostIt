@@ -16,6 +16,8 @@ import { PendingQueueContainer } from './features/pending/PendingQueueContainer'
 import { PostPreviewContainer } from './features/preview/PostPreviewContainer';
 import { SettingsContainer } from './features/settings/SettingsContainer';
 
+import { LoginPage } from './features/auth/LoginPage';
+
 const SESSION_KEY = 'postit_user_session';
 
 const defaultSettings: AppSettings = {
@@ -102,6 +104,7 @@ export function App() {
 
   const handleLogout = () => {
     setUser(null);
+    localStorage.setItem(SESSION_KEY, ''); // Emptying string to remove session
     localStorage.removeItem(SESSION_KEY);
     showToast('Sesión cerrada correctamente', 'info');
     setIsAuthModalOpen(false);
@@ -113,6 +116,15 @@ export function App() {
     setUser(updated);
     localStorage.setItem(SESSION_KEY, JSON.stringify(updated));
   };
+
+  if (!user) {
+    return (
+      <>
+        <LoginPage onLoginWithGoogle={handleLoginWithGoogle} showToast={showToast} />
+        <ToastContainer toasts={toasts} />
+      </>
+    );
+  }
 
   return (
     <div className="app-container">
