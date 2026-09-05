@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { LogIn, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface Props {
   onLoginWithGoogle: (email: string, name: string, avatarUrl?: string) => void;
