@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { handleOAuthCallback, type OAuthProvider } from './_lib/OAuthCallbackHandler';
+import { handleOAuthCallback, type OAuthProvider } from './_lib/OAuthCallbackHandler.js';
 
 const threadsProvider: OAuthProvider = {
   name: 'threads',
