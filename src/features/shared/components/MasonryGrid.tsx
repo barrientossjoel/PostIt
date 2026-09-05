@@ -21,7 +21,7 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({ children, columnWidth 
     >
       {React.Children.map(children, (child) => {
         if (!React.isValidElement(child)) return child;
-        return <MasonryItem gap={gap} columnWidth={columnWidth}>{child}</MasonryItem>;
+        return <MasonryItem gap={gap}>{child}</MasonryItem>;
       })}
     </div>
   );
@@ -30,10 +30,9 @@ export const MasonryGrid: React.FC<MasonryGridProps> = ({ children, columnWidth 
 interface MasonryItemProps {
   children: React.ReactNode;
   gap: number;
-  columnWidth: number;
 }
 
-const MasonryItem: React.FC<MasonryItemProps> = ({ children, gap, columnWidth }) => {
+const MasonryItem: React.FC<MasonryItemProps> = ({ children, gap }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [spans, setSpans] = useState(1);
 

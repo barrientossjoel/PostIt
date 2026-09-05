@@ -30,12 +30,7 @@ const defaultSettings: AppSettings = {
   enabledRepoIds: [],
 };
 
-export function App() {
-  // Render the lightweight OAuth callback page inside the popup window
-  if (window.location.pathname === '/oauth-callback') {
-    return <OAuthCallbackPage />;
-  }
-
+function MainApp() {
   const [activeTab, setActiveTab] = useState<TabId>('explorer');
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [currentPost, setCurrentPost] = useState<Post | null>(null);
@@ -196,6 +191,14 @@ export function App() {
       <ToastContainer toasts={toasts} />
     </div>
   );
+}
+
+export function App() {
+  if (window.location.pathname === '/oauth-callback') {
+    return <OAuthCallbackPage />;
+  }
+
+  return <MainApp />;
 }
 
 export default App;

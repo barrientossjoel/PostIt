@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { UserProfile } from '../../core/entities/User';
 
 interface Props {
   onLoginWithGoogle: (email: string, name: string, avatarUrl?: string) => void;
